@@ -1,0 +1,41 @@
+name: Publish
+
+on:
+  release:
+    types:
+      - published
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: jdx/mise-action@v4
+        with:
+          install: true
+
+      - name: Install dependencies
+        run: mise x pnpm -- pnpm install --frozen-lockfile
+
+      - name: Validate
+        run: mise x pnpm -- pnpm run check
+
+      - name: Package plugin
+        run: |
+          mkdir -p release
+          cp package.json README.md LICENSE release/
+          cp -R dist release/dist
+          if [ -f icon.png ]; then cp icon.png release/; fi
+          if [ -f screenshot.png ]; then cp screenshot.png release/; fi
+          cd release
+          zip -r ../logseq-plugin-bidi.zip .
+
+      - name: Upload release ZIP
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ github.event.release.tag_name }}" logseq-plugin-bidi.zip --clobber

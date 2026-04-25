@@ -1,0 +1,50 @@
+{
+  "name": "logseq-plugin-bidi",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Bidirectional text and RTL block layout support for modern Logseq builds",
+  "main": "dist/index.html",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yshalsager/logseq-plugin-bidi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yshalsager/logseq-plugin-bidi/issues"
+  },
+  "homepage": "https://github.com/yshalsager/logseq-plugin-bidi#readme",
+  "scripts": {
+    "build": "vite build --config vite.config.ts",
+    "check": "pnpm run typecheck && pnpm run test && pnpm run build",
+    "dev": "vite --config vite.config.ts",
+    "domain:manage": "vite-plugin-domain",
+    "test": "rm -rf .test-out && esbuild src/*.test.ts --bundle --platform=node --format=esm --outdir=.test-out && node --test .test-out/*.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "logseq",
+    "plugin",
+    "rtl",
+    "bidi",
+    "bidirectional",
+    "arabic"
+  ],
+  "author": "yshalsager <contact@yshalsager.com>",
+  "license": "AGPL-3.0-or-later",
+  "dependencies": {
+    "@logseq/libs": "^0.3.2"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.0",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.10",
+    "vite-plugin-domain": "^2.0.5"
+  },
+  "logseq": {
+    "id": "logseq-plugin-bidi",
+    "title": "Logseq Plugin Bidi",
+    "icon": "icon.png",
+    "entry": "dist/index.html",
+    "minSDKVersion": "0.3.2"
+  }
+}

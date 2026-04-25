@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">Logseq Plugin Bidi icon</title>
+  <desc id="desc">Bidirectional arrows around Arabic and Latin letters.</desc>
+  <rect width="256" height="256" rx="56" fill="#101715"/>
+  <rect x="54" y="73" width="92" height="18" rx="9" fill="#4cc38a"/>
+  <polygon points="136,50 178,82 136,114" fill="#4cc38a"/>
+  <rect x="110" y="165" width="92" height="18" rx="9" fill="#79a8ff"/>
+  <polygon points="120,142 78,174 120,206" fill="#79a8ff"/>
+  <text x="72" y="154" fill="#ecf0ee" font-family="Arial, Helvetica, sans-serif" font-size="74" font-weight="700">A</text>
+  <text x="135" y="157" fill="#ecf0ee" font-family="Arial, Helvetica, sans-serif" font-size="74" font-weight="700">ع</text>
+</svg>

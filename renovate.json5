@@ -1,0 +1,32 @@
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+
+  extends: [
+    'config:best-practices',
+    ':dependencyDashboard',
+    ':timezone(Africa/Cairo)',
+    ':label(dependencies)',
+    'helpers:pinGitHubActionDigests',
+  ],
+
+  enabledManagers: ['npm', 'github-actions', 'mise'],
+
+  schedule: ['before 3am on saturday'],
+  minimumReleaseAge: '3 days',
+  rebaseWhen: 'behind-base-branch',
+
+  packageRules: [
+    {
+      matchManagers: ['npm'],
+      groupName: 'npm dependencies',
+    },
+    {
+      matchManagers: ['github-actions'],
+      groupName: 'github actions',
+    },
+    {
+      matchManagers: ['mise'],
+      groupName: 'mise tools',
+    },
+  ],
+}
