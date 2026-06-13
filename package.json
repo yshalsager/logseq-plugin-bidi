@@ -41,7 +41,7 @@
     }
   },
   "devDependencies": {
-    "esbuild": "^0.28.0",
+    "esbuild": "^0.28.1",
     "typescript": "^6.0.3",
     "vite": "^8.0.10",
     "vite-plugin-domain": "^2.0.5"
