@@ -10,7 +10,7 @@ importers:
     dependencies:
       '@logseq/libs':
         specifier: ^0.3.2
-        version: 0.3.3
+        version: 0.3.4
     devDependencies:
       esbuild:
         specifier: 0.28.1
@@ -198,8 +198,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@logseq/libs@0.3.3':
-    resolution: {integrity: sha512-Xy82moxglYtZutke++8PVOCxeMhJs8ngWNBKX6i/YgxMmzqyDxXRJnu5kAsQSZXHWBEjFsrYVLAvvF39Y3P9bg==}
+  '@logseq/libs@0.3.4':
+    resolution: {integrity: sha512-/68j0j8Ps7PgEuKsWQhUoiLoineTQNH/DHTBQ07NX8M31rqSpWuZaI6fFhfWv46qLIK0Q9Gz+SKQf6XMQ9ADag==}
 
   '@napi-rs/wasm-runtime@1.1.5':
     resolution: {integrity: sha512-AWPoBRJ9tsnVhor4sjO7rkni+7p+2IAEFj6cx06UgP10jkQHqay/36uRV/bFkgrh18D9vb4cr8Q0Pthskgzy+Q==}
@@ -653,7 +653,7 @@ snapshots:
   '@esbuild/win32-x64@0.28.1':
     optional: true
 
-  '@logseq/libs@0.3.3':
+  '@logseq/libs@0.3.4':
     dependencies:
       change-case: 5.4.4
       csstype: 3.2.3
