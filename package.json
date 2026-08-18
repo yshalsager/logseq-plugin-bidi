@@ -33,10 +33,10 @@
   "author": "yshalsager <contact@yshalsager.com>",
   "license": "AGPL-3.0-or-later",
   "dependencies": {
-    "@logseq/libs": "^0.3.2"
+    "@logseq/libs": "^0.3.4"
   },
   "devDependencies": {
-    "@types/node": "^24.13.3",
+    "@types/node": "^26.2.0",
     "esbuild": "0.28.2",
     "typescript": "7.0.2",
     "vite": "8.2.1",
