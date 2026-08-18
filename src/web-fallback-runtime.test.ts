@@ -3,7 +3,8 @@ import test from 'node:test'
 import {
   collect_rtl_block_ids_from_tree,
   create_cached_page_ref_resolver,
-  resolve_page_refs_in_text
+  resolve_page_refs_in_text,
+  update_rtl_block_ids
 } from './web-fallback-logic'
 
 test('collects rtl block ids from page-reference-only blocks', async () => {
@@ -63,6 +64,17 @@ test('caches repeated page reference resolution', async () => {
 
   assert.deepEqual(block_ids, ['first', 'second'])
   assert.equal(calls, 1)
+})
+
+test('updates only changed block directions', async () => {
+  const rtl_block_ids = new Set(['unchanged-rtl', 'changed-to-ltr'])
+
+  await update_rtl_block_ids(rtl_block_ids, [
+    { uuid: 'changed-to-ltr', content: 'English now' },
+    { uuid: 'changed-to-rtl', content: 'عربي الآن' }
+  ], async () => null)
+
+  assert.deepEqual([...rtl_block_ids].sort(), ['changed-to-rtl', 'unchanged-rtl'])
 })
 
 test('skips page reference resolution when prefix already fixes direction', async () => {

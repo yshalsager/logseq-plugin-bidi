@@ -49,10 +49,11 @@ test('web fallback classifies realistic bidi page blocks', async () => {
 test('web fallback css targets only rtl fixture blocks and preserves native controls', () => {
   const css = build_rtl_blocks_css(['arabic', 'arabic-page-ref-uuid', 'nested-rtl-child'])
 
-  assert.match(css, /\.ls-block\[blockid="arabic"\]/)
-  assert.match(css, /\.ls-block\[blockid="arabic-page-ref-uuid"\]/)
-  assert.match(css, /\.ls-block\[blockid="nested-rtl-child"\]:not\(:has\(> \.block-main-container > \.block-renderer-container\)\) > \.block-main-container/)
+  assert.match(css, /\[blockid="arabic"\]/)
+  assert.match(css, /\[blockid="arabic-page-ref-uuid"\]/)
+  assert.match(css, /\[blockid="nested-rtl-child"\]/)
+  assert.match(css, /&\.ls-block > \.block-main-container/)
   assert.doesNotMatch(css, /#control-|\.bullet-link-wrap|\.bullet-container/)
-  assert.doesNotMatch(css, /\.ls-block\[blockid="english"\]/)
-  assert.doesNotMatch(css, /\.ls-block\[blockid="english-leading-mixed"\]/)
+  assert.doesNotMatch(css, /\[blockid="english"\]/)
+  assert.doesNotMatch(css, /\[blockid="english-leading-mixed"\]/)
 })

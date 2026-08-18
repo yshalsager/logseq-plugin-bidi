@@ -79,3 +79,19 @@ export const collect_rtl_block_ids_from_tree = async (
   }))
   return block_ids.filter((block_id): block_id is string => typeof block_id === 'string')
 }
+
+export const update_rtl_block_ids = async (
+  rtl_block_ids: Set<string>,
+  changed_blocks: Array<unknown>,
+  resolve_page_ref: PageRefResolver
+): Promise<void> => {
+  const changed_ids = flatten_block_tree(changed_blocks)
+    .map(block_id_from_node)
+    .filter((block_id): block_id is string => block_id !== null)
+  const changed_rtl_ids = new Set(await collect_rtl_block_ids_from_tree(changed_blocks, resolve_page_ref))
+
+  changed_ids.forEach((block_id) => {
+    if (changed_rtl_ids.has(block_id)) rtl_block_ids.add(block_id)
+    else rtl_block_ids.delete(block_id)
+  })
+}

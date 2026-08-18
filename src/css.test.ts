@@ -18,7 +18,9 @@ const uuid = '69e6aaae-a0e9-4df8-aa55-1961e7c03f28'
 
 test('escapes attribute values without changing uuid selectors', () => {
   assert.equal(css_attr_value(uuid), uuid)
-  assert.match(build_rtl_blocks_css([uuid]), new RegExp(`\\.ls-block\\[blockid="${uuid}"\\]:not\\(:has\\(> \\.block-main-container > \\.block-renderer-container\\)\\) > \\.block-main-container \\{`))
+  const css = build_rtl_blocks_css([uuid])
+  assert.match(css, new RegExp(`\\[blockid="${uuid}"\\]`))
+  assert.equal(css.split(uuid).length - 1, 1)
 })
 
 test('escapes prefixed id selector fragments without corrupting leading digits', () => {
@@ -37,8 +39,14 @@ test('preserves current Logseq row order and excludes full-block renderers', () 
   assert.match(host_pr_parity_style, /\.block-main-container:not\(:has\(> \.block-renderer-container\)\)/)
   assert.doesNotMatch(host_pr_parity_style, /^\.ls-block(?!:not\(\.is-comments-area\))/m)
   assert.match(host_pr_parity_style, /\.flex\.flex-col\.w-full:not\(\.block-control-wrap\):not\(\.block-renderer-container\)/)
-  assert.match(web_css, /\.ls-block\[blockid="[^"\n]+"\]:not\(:has\(> \.block-main-container > \.block-renderer-container\)\)/)
-  assert.match(web_css, new RegExp(`\\.ls-comment-body \\.block-content\\[blockid="${uuid}"\\] \\{\\n  direction: rtl !important;\\n  text-align: right;`))
+  assert.match(web_css, /\.ls-block:not\(:has\(> \.block-main-container > \.block-renderer-container\)\)/)
+  assert.match(web_css, /&\.ls-block > \.block-main-container/)
+  assert.match(web_css, /&\.block-content \{\n    direction: rtl !important;\n    text-align: right;/)
+})
+
+test('generated rtl css stays compact for large pages', () => {
+  const block_ids = Array.from({ length: 1000 }, (_, index) => `00000000-0000-0000-0000-${String(index).padStart(12, '0')}`)
+  assert.ok(Buffer.byteLength(build_rtl_blocks_css(block_ids)) < 100_000)
 })
 
 test('bidi css preserves native block controls', () => {
