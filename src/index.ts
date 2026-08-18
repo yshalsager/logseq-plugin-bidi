@@ -69,4 +69,7 @@ const main = async (): Promise<void> => {
   })
 }
 
-logseq.ready(main).catch(console.error)
+logseq.ready(main).catch((error) => {
+  console.error('[logseq-plugin-bidi] startup failed', error)
+  void logseq.UI.showMsg('Bidi plugin failed to start. Check DevTools for details.', 'error')
+})

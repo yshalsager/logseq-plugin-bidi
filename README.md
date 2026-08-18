@@ -9,9 +9,10 @@ This plugin ports the important behavior from [Logseq PR #12526](https://github.
 ## What It Does
 
 - Applies `dir="auto"` to block content, page title, editor textarea, and Logseq's hidden `#mock-text` editor mirror.
-- Uses one first-strong direction inference path for rendered blocks and editor content.
-- Mirrors the PR-style `data-row-dir` layout on desktop when the graph DOM is accessible.
-- Uses Logseq API data plus block-id-targeted CSS on Logseq web, where the plugin iframe cannot access the host DOM.
+- Delegates Unicode first-strong direction detection to the browser.
+- Uses `dir="auto"` and `:dir(rtl)` on desktop when the graph DOM is accessible.
+- Uses Logseq API data plus compact block-id-targeted CSS on Logseq web, where the plugin iframe cannot access the host DOM.
+- Supports `direction:: rtl`, `direction:: ltr`, and `direction:: auto` block properties for ambiguous text.
 - Keeps settings minimal; the only plugin setting is debug logging.
 
 ## Development Note
@@ -20,20 +21,14 @@ This plugin was developed with AI-assisted coding. Changes are still reviewed, t
 
 ## Runtime Paths
 
-- `src/direction.ts`: shared bidi inference and inline/page-reference text extraction.
-- `src/desktop-runtime.ts`: host-DOM runtime for desktop/pre-PR builds.
-- `src/web-fallback-runtime.ts`: Logseq web fallback runtime.
-- `src/host-css.ts`: static PR-parity CSS for `data-row-dir`.
-- `src/web-fallback-css.ts`: generated CSS for web fallback block ids.
+- `src/direction.ts`: browser-native bidi probing and inline/page-reference text extraction.
+- `src/desktop-runtime.ts`: host-DOM `dir="auto"` runtime.
+- `src/web-fallback-runtime.ts`: Logseq web API/CSS fallback runtime.
+- `src/host-css.ts`: static desktop RTL layout CSS.
+- `src/web-fallback-css.ts`: compact generated CSS for web fallback block ids.
 - `src/base-css.ts`: startup CSS composition.
 
-On Logseq web, this console message is expected:
-
-```text
-Logseq Plugin Bidi: host DOM is not accessible, using per-block content-aware fallback.
-```
-
-It means the plugin switched to the API/CSS fallback path because Logseq web isolates plugins from the app DOM.
+Debug logging reports which runtime is active when enabled. Web row mirroring depends on Logseq's current-page APIs; aggregate routes that expose no current page receive only the static text-direction handling until Logseq supplies block context.
 
 ## Development
 
@@ -104,8 +99,8 @@ pnpm run check
 3. Create and push a version tag:
 
 ```bash
-git tag v0.1.0
-git push origin v0.1.0
+git tag v<package-version>
+git push origin v<package-version>
 ```
 
 4. Create a GitHub release from that tag.
