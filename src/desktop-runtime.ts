@@ -11,7 +11,6 @@ ${outline_block_selector} .block-title-wrap,
 .editor-inner textarea,
 #mock-text`
 
-const excluded_block_selector = '.ls-block:is(.is-comments-area, :has(> .block-main-container > .block-renderer-container))'
 const override_block_selector = `${outline_block_selector}[data-block-title]`
 
 const set_dir_auto = (node: Element): void => {
@@ -27,22 +26,12 @@ const apply_block_override = (block: Element): void => {
   })
 }
 
-const clear_excluded_block_direction = (node: Element): void => {
-  node.removeAttribute('dir')
-  const main_container = node.querySelector(':scope > .block-main-container')
-  main_container?.removeAttribute('dir')
-  main_container?.removeAttribute('data-row-dir')
-}
-
 const apply_auto_dir_to_node = (node: Node): void => {
   if (node.nodeType !== 1) return
   const element = node as Element
 
   if (element.matches(auto_dir_selector)) set_dir_auto(element)
   element.querySelectorAll(auto_dir_selector).forEach(set_dir_auto)
-
-  if (element.matches(excluded_block_selector)) clear_excluded_block_direction(element)
-  element.querySelectorAll(excluded_block_selector).forEach(clear_excluded_block_direction)
 
   const parent_block = element.closest(override_block_selector)
   if (parent_block) apply_block_override(parent_block)
