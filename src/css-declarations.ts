@@ -13,10 +13,6 @@ export const rtl_editor_text_declarations = `  direction: rtl;
   text-align: right;
   unicode-bidi: plaintext;`
 
-export const rtl_editor_text_important_declarations = `  direction: rtl !important;
-  text-align: right !important;
-  unicode-bidi: plaintext;`
-
 export const rtl_children_container_declarations = `  margin-left: 0;
   margin-inline-start: 0;
   margin-inline-end: 29px;`
