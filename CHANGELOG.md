@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4] - 2026-08-18
+
+### Fixed
+
+- Prevented hot upgrades from v0.1.1 from mistaking plugin-owned row attributes for native Logseq bidi support and disabling the runtime.
+- Removed only the legacy `dir="auto"` plus `data-row-dir` marker pair before native capability detection.
+
 ## [0.1.3] - 2026-08-18
 
 ### Fixed
