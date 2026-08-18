@@ -7,13 +7,11 @@
     "skipLibCheck": true,
     "isolatedModules": true,
     "types": [
-      "@logseq/libs"
+      "@logseq/libs",
+      "node"
     ]
   },
   "include": [
     "src/**/*.ts"
-  ],
-  "exclude": [
-    "src/*.test.ts"
   ]
 }

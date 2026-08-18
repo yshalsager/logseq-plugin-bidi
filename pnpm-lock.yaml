@@ -12,6 +12,9 @@ importers:
         specifier: ^0.3.2
         version: 0.3.4
     devDependencies:
+      '@types/node':
+        specifier: ^24.13.3
+        version: 24.13.3
       esbuild:
         specifier: 0.28.2
         version: 0.28.2
@@ -20,10 +23,10 @@ importers:
         version: 7.0.2
       vite:
         specifier: 8.2.1
-        version: 8.2.1(esbuild@0.28.2)
+        version: 8.2.1(@types/node@24.13.3)(esbuild@0.28.2)
       vite-plugin-domain:
         specifier: 2.0.5
-        version: 2.0.5(vite@8.2.1(esbuild@0.28.2))
+        version: 2.0.5(vite@8.2.1(@types/node@24.13.3)(esbuild@0.28.2))
 
 packages:
 
@@ -287,6 +290,9 @@ packages:
 
   '@rolldown/pluginutils@1.0.1':
     resolution: {integrity: sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw==}
+
+  '@types/node@24.13.3':
+    resolution: {integrity: sha512-Dh8vAsV36ig5wa9OX4pXvMc9D3Veibfw2wix0CUwYODLD8nkj9UsLjASr49nPg+2eKzxhBV+v7L8pXvT4e639Q==}
 
   '@types/trusted-types@2.0.7':
     resolution: {integrity: sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==}
@@ -589,6 +595,9 @@ packages:
     engines: {node: '>=16.20.0'}
     hasBin: true
 
+  undici-types@7.18.2:
+    resolution: {integrity: sha512-AsuCzffGHJybSaRrmr5eHr81mwJU3kjw6M+uprWvCXiNeN9SOGwQ3Jn8jb8m3Z6izVgknn1R0FTCEAP2QrLY/w==}
+
   util@0.10.4:
     resolution: {integrity: sha512-0Pm9hTQ3se5ll1XihRic3FDIku70C+iHUdT/W926rSgHV5QgXsYbKZN8MSC3tJtSkhuROzvsQjAaFENRXr+19A==}
 
@@ -790,6 +799,10 @@ snapshots:
     optional: true
 
   '@rolldown/pluginutils@1.0.1': {}
+
+  '@types/node@24.13.3':
+    dependencies:
+      undici-types: 7.18.2
 
   '@types/trusted-types@2.0.7':
     optional: true
@@ -1036,17 +1049,19 @@ snapshots:
       '@typescript/typescript-win32-arm64': 7.0.2
       '@typescript/typescript-win32-x64': 7.0.2
 
+  undici-types@7.18.2: {}
+
   util@0.10.4:
     dependencies:
       inherits: 2.0.3
 
-  vite-plugin-domain@2.0.5(vite@8.2.1(esbuild@0.28.2)):
+  vite-plugin-domain@2.0.5(vite@8.2.1(@types/node@24.13.3)(esbuild@0.28.2)):
     dependencies:
       '@clack/prompts': 1.1.0
       picocolors: 1.1.1
-      vite: 8.2.1(esbuild@0.28.2)
+      vite: 8.2.1(@types/node@24.13.3)(esbuild@0.28.2)
 
-  vite@8.2.1(esbuild@0.28.2):
+  vite@8.2.1(@types/node@24.13.3)(esbuild@0.28.2):
     dependencies:
       lightningcss: 1.33.0
       picomatch: 4.0.5
@@ -1054,5 +1069,6 @@ snapshots:
       rolldown: 1.2.4
       tinyglobby: 0.2.17
     optionalDependencies:
+      '@types/node': 24.13.3
       esbuild: 0.28.2
       fsevents: 2.3.3

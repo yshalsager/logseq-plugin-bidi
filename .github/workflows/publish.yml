@@ -19,6 +19,9 @@ jobs:
         with:
           install: true
 
+      - name: Verify release version
+        run: test "${GITHUB_REF_NAME#v}" = "$(node -p "require('./package.json').version")"
+
       - name: Install dependencies
         run: mise x pnpm -- pnpm install --frozen-lockfile
 
@@ -34,6 +37,9 @@ jobs:
           if [ -f screenshot.png ]; then cp screenshot.png release/; fi
           cd release
           zip -r ../logseq-plugin-bidi.zip .
+          cd ..
+          unzip -t logseq-plugin-bidi.zip
+          unzip -l logseq-plugin-bidi.zip | grep -q 'dist/index.html'
 
       - name: Upload release ZIP
         env:
