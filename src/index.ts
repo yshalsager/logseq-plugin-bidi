@@ -2,6 +2,7 @@ import '@logseq/libs'
 import { build_base_style } from './base-css'
 import {
   get_graph_document,
+  has_native_bidi_support,
   install_host_direction_runtime
 } from './desktop-runtime'
 import { type Cleanup } from './runtime-utils'
@@ -31,6 +32,12 @@ const clear_runtime = (): void => {
 const start_runtime = (): void => {
   const settings = read_settings(logseq.settings)
   const { graph_block_dom_available, graph_document, host_dom_access } = get_graph_document()
+
+  if (graph_block_dom_available && has_native_bidi_support(graph_document)) {
+    logseq.provideStyle({ key: style_key, style: '' })
+    log_debug(settings, 'native Logseq bidi support detected; plugin runtime disabled')
+    return
+  }
 
   install_style(host_dom_access)
 

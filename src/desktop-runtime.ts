@@ -1,7 +1,7 @@
 import { text_direction_override } from './direction'
 import { type Cleanup } from './runtime-utils'
 
-const outline_block_selector = '.ls-block:not(.is-comments-area):not([data-is-property]):not([data-query]):not([data-transclude]):not([data-embed]):not(:has(> .block-main-container > .block-renderer-container))'
+const outline_block_selector = '.ls-block:not(.is-comments-area):not([data-is-property]):not([data-query]):not([data-transclude]):not([data-embed]):not(:has(> .block-main-container[data-row-dir])):not(:has(> .block-main-container > .block-renderer-container))'
 const auto_dir_selector = `
 ${outline_block_selector} .block-content,
 ${outline_block_selector} .block-content-inner,
@@ -76,6 +76,10 @@ const try_get_window_document = (target_window: Window | null | undefined): Docu
     return null
   }
 }
+
+export const has_native_bidi_support = (graph_document: Document): boolean => (
+  !!graph_document.querySelector('.ls-block > .block-main-container[data-row-dir]')
+)
 
 const doc_has_graph_blocks = (target_document: Document | null): boolean => (
   !!target_document?.querySelector('.ls-block[blockid] > .block-main-container, .ls-block > .block-main-container')

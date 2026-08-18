@@ -25,7 +25,7 @@ export const web_text_fallback_style = `
 `
 
 const bidi_target_selector = (block_ids: Array<string>): string => `:is(
-  .ls-block:not([data-is-property]):not([data-query]):not([data-transclude]):not([data-embed]):not(:has(> .block-main-container > .block-renderer-container)),
+  .ls-block:not([data-is-property]):not([data-query]):not([data-transclude]):not([data-embed]):not(:has(> .block-main-container[data-row-dir])):not(:has(> .block-main-container > .block-renderer-container)),
   .ls-comment-body .block-content
 ):is(
 ${block_ids.map((block_id) => `  [blockid="${css_attr_value(block_id)}"]`).join(',\n')}

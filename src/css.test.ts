@@ -12,6 +12,7 @@ import {
   css_attr_value,
   css_identifier_part
 } from './css-utils'
+import { has_native_bidi_support } from './desktop-runtime'
 import { host_pr_parity_style } from './host-css'
 
 const uuid = '69e6aaae-a0e9-4df8-aa55-1961e7c03f28'
@@ -36,7 +37,8 @@ test('preserves current Logseq row order and excludes full-block renderers', () 
   assert.doesNotMatch(web_css, /\border:/)
   assert.match(host_pr_parity_style, /flex-direction: row-reverse;/)
   assert.match(host_pr_parity_style, /\.block-content:dir\(rtl\)/)
-  assert.doesNotMatch(host_pr_parity_style, /data-row-dir/)
+  assert.match(host_pr_parity_style, /:not\(:has\(> \.block-main-container\[data-row-dir\]\)\)/)
+  assert.doesNotMatch(host_pr_parity_style, /\[data-row-dir="rtl"\]/)
   assert.match(web_css, /flex-direction: row-reverse;/)
   assert.match(host_pr_parity_style, /\.block-main-container:not\(:has\(> \.block-renderer-container\)\)/)
   assert.doesNotMatch(host_pr_parity_style, /^\.ls-block(?!:not\(\.is-comments-area\))/m)
@@ -47,6 +49,11 @@ test('preserves current Logseq row order and excludes full-block renderers', () 
   assert.match(web_css, /&\.ls-block > \.block-children-container/)
   assert.match(web_css, /&\.ls-block > \.block-main-container/)
   assert.match(web_css, /&\.block-content \{\n    direction: rtl !important;\n    text-align: right;/)
+})
+
+test('detects native Logseq row direction markers', () => {
+  assert.equal(has_native_bidi_support({ querySelector: () => ({}) } as unknown as Document), true)
+  assert.equal(has_native_bidi_support({ querySelector: () => null } as unknown as Document), false)
 })
 
 test('generated rtl css stays compact for large pages', () => {
