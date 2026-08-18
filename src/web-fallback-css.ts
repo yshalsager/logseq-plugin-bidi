@@ -17,7 +17,6 @@ export const web_text_fallback_style = `
 }
 
 .page-reference {
-  direction: ltr;
   unicode-bidi: isolate;
 }
 `

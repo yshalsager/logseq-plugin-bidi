@@ -65,7 +65,8 @@ test('base style can include or omit web fallback css', () => {
   assert.match(desktop_css, /\.ls-block:not\(\.is-comments-area\):not\(\[data-is-property\]\):not\(\[data-query\]\)/)
   assert.doesNotMatch(desktop_css, /\.editor-inner textarea,\n#mock-text/)
   assert.match(web_css, /\.editor-inner textarea,\n#mock-text/)
-  assert.match(web_css, /\.page-reference \{\n  direction: ltr;\n  unicode-bidi: isolate;/)
+  assert.match(web_css, /\.page-reference \{\n  unicode-bidi: isolate;/)
+  assert.doesNotMatch(web_css, /\.page-reference \{\n  direction:/)
 })
 
 test('page title css is only generated for rtl titles', () => {
