@@ -1,0 +1,30 @@
+# Changelog
+
+## [0.1.2] - 2026-08-18
+
+### Fixed
+
+- Preserved Logseq's source order and native block controls for commented, collapsed, ordered-list, icon, and future block-row actions.
+- Restored right-side indentation and thread guidelines for nested RTL blocks.
+- Excluded comments-area wrappers, properties, queries, embeds, transclusions, and full-block plugin renderers from ordinary row mirroring.
+- Made Arabic and English comments resolve direction independently on desktop and web.
+- Replaced script-range heuristics with browser-native Unicode first-strong detection, including weak characters, long prefixes, and supplementary-plane scripts.
+- Normalized combined task, property, list, priority, link, and page-reference prefixes independent of order.
+- Inferred web direction from visible block-reference and page-reference labels instead of raw UUIDs or normalized page names.
+- Removed the forced LTR direction from Arabic and Hebrew page references.
+- Prevented stale route, restart, editor, and unload work from restoring old directions or styles.
+- Kept the last known-good web style when a transient refresh fails.
+- Resolved SDK block UUID tuples before direction classification.
+
+### Added
+
+- Per-block `direction:: rtl`, `direction:: ltr`, and `direction:: auto` overrides.
+- Capability detection that disables the plugin when Logseq provides native `data-row-dir` support.
+- Pull-request and push validation, test typechecking, release-tag validation, and ZIP smoke checks.
+
+### Changed
+
+- Reduced generated CSS for 1,000 RTL blocks from several megabytes to about 57 KiB.
+- Updated web styles incrementally from changed blocks and removed idle editor polling.
+- Delegated desktop updates to `dir="auto"` and targeted mutation handling instead of page-wide rescans.
+- Updated dependencies, including `@logseq/libs` 0.3.4.

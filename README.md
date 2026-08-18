@@ -103,15 +103,15 @@ git tag v<package-version>
 git push origin v<package-version>
 ```
 
-4. Create a GitHub release from that tag.
-5. Wait for `.github/workflows/publish.yml` to attach `logseq-plugin-bidi.zip` to the release.
-6. Install the release ZIP in Logseq and verify desktop and web behavior before submitting to the marketplace.
+4. Wait for `.github/workflows/publish.yml` to create the GitHub release from `CHANGELOG.md` and attach `logseq-plugin-bidi.zip`.
+5. Install the release ZIP in Logseq and verify desktop and web behavior before submitting to the marketplace.
 
 The release ZIP contains the built plugin files at the archive root:
 
 ```text
 package.json
 README.md
+CHANGELOG.md
 LICENSE
 icon.png
 screenshot.png
