@@ -66,9 +66,13 @@ const try_get_window_document = (target_window: Window | null | undefined): Docu
   }
 }
 
-export const has_native_bidi_support = (graph_document: Document): boolean => (
-  !!graph_document.querySelector('.ls-block > .block-main-container[data-row-dir]')
-)
+export const has_native_bidi_support = (graph_document: Document): boolean => {
+  graph_document.querySelectorAll('.ls-block > .block-main-container[dir="auto"][data-row-dir]').forEach((node) => {
+    node.removeAttribute('dir')
+    node.removeAttribute('data-row-dir')
+  })
+  return !!graph_document.querySelector('.ls-block > .block-main-container[data-row-dir]')
+}
 
 const doc_has_graph_blocks = (target_document: Document | null): boolean => (
   !!target_document?.querySelector('.ls-block[blockid] > .block-main-container, .ls-block > .block-main-container')

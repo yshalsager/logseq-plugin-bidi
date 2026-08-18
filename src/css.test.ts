@@ -51,9 +51,20 @@ test('preserves current Logseq row order and excludes full-block renderers', () 
   assert.match(web_css, /&\.block-content \{\n    direction: rtl !important;\n    text-align: right;/)
 })
 
-test('detects native Logseq row direction markers', () => {
-  assert.equal(has_native_bidi_support({ querySelector: () => ({}) } as unknown as Document), true)
-  assert.equal(has_native_bidi_support({ querySelector: () => null } as unknown as Document), false)
+test('detects native markers without mistaking v0.1.1 attributes for core support', () => {
+  const removed: Array<string> = []
+  const legacy_document = {
+    querySelectorAll: () => [{ removeAttribute: (name: string) => removed.push(name) }],
+    querySelector: () => null
+  } as unknown as Document
+  const native_document = {
+    querySelectorAll: () => [],
+    querySelector: () => ({})
+  } as unknown as Document
+
+  assert.equal(has_native_bidi_support(legacy_document), false)
+  assert.deepEqual(removed, ['dir', 'data-row-dir'])
+  assert.equal(has_native_bidi_support(native_document), true)
 })
 
 test('generated rtl css stays compact for large pages', () => {
