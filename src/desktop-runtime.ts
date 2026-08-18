@@ -1,9 +1,10 @@
 import { type Cleanup } from './runtime-utils'
 
+const outline_block_selector = '.ls-block:not(.is-comments-area):not([data-is-property]):not([data-query]):not([data-transclude]):not([data-embed]):not(:has(> .block-main-container > .block-renderer-container))'
 const auto_dir_selector = `
-.ls-block:not(.is-comments-area):not(:has(> .block-main-container > .block-renderer-container)) .block-content,
-.ls-block:not(.is-comments-area):not(:has(> .block-main-container > .block-renderer-container)) .block-content-inner,
-.ls-block:not(.is-comments-area):not(:has(> .block-main-container > .block-renderer-container)) .block-title-wrap,
+${outline_block_selector} .block-content,
+${outline_block_selector} .block-content-inner,
+${outline_block_selector} .block-title-wrap,
 .ls-comment-body .block-content[blockid],
 .ls-page-title,
 .editor-inner textarea,

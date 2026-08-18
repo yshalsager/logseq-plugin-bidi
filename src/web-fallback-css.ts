@@ -2,9 +2,6 @@ import { css_attr_value, css_identifier_part, css_rule } from './css-utils'
 import {
   row_item_fill_declarations,
   row_ltr_declarations,
-  rtl_children_border_declarations,
-  rtl_children_border_position_declarations,
-  rtl_children_container_declarations,
   rtl_editor_text_declarations,
   rtl_row_layout_declarations
 } from './css-declarations'
@@ -26,7 +23,7 @@ export const web_text_fallback_style = `
 `
 
 const bidi_target_selector = (block_ids: Array<string>): string => `:is(
-  .ls-block:not(:has(> .block-main-container > .block-renderer-container)),
+  .ls-block:not([data-is-property]):not([data-query]):not([data-transclude]):not([data-embed]):not(:has(> .block-main-container > .block-renderer-container)),
   .ls-comment-body .block-content
 ):is(
 ${block_ids.map((block_id) => `  [blockid="${css_attr_value(block_id)}"]`).join(',\n')}
@@ -60,39 +57,11 @@ const block_row_item_selector_list = (suffix: string): string => (
   ].join(',\n')
 )
 
-const ltr_children_container_declarations = `  margin-left: 29px;
-  margin-inline-start: 29px;
-  margin-inline-end: 0;`
-
-const ltr_children_border_position_declarations = `  left: -1px;
-  right: auto;
-  inset-inline-start: -1px;
-  inset-inline-end: auto;`
-
-const ltr_children_border_declarations = `  border-left-width: var(--ls-block-bullet-threading-width, 1px) !important;
-  border-left-color: var(--ls-guideline-color, var(--ls-bullet-threading-background-color, #ddd));
-  border-right-width: 0 !important;
-  border-inline-start-width: var(--ls-block-bullet-threading-width, 1px) !important;
-  border-inline-start-color: var(--ls-guideline-color, var(--ls-bullet-threading-background-color, #ddd));
-  border-inline-end-width: 0 !important;`
-
 const build_row_item_fill_css = (): string => (
   css_rule([
     block_row_item_selector_list('.block-content-wrapper'),
     block_row_item_selector_list('.editor-wrapper')
   ].join(',\n'), row_item_fill_declarations)
-)
-
-const build_children_thread_css = (
-  container_declarations: string,
-  border_position_declarations: string,
-  border_declarations: string
-): string => (
-  [
-    css_rule('&.ls-block .block-children-container', container_declarations),
-    css_rule('&.ls-block .block-children-left-border', border_position_declarations),
-    css_rule('&.ls-block .block-children', border_declarations)
-  ].join('\n\n')
 )
 
 const nest_css = (rules: Array<string>): string => rules.join('\n\n').replace(/^/gm, '  ')
@@ -122,11 +91,6 @@ ${nest_css([
     block_row_item_selector_list('.ls-block-right:empty'),
     block_row_item_selector_list('.ls-block-right:not(:has(> :not(:empty)))')
   ].join(',\n'), '  display: none;'),
-  build_children_thread_css(
-    rtl_children_container_declarations,
-    rtl_children_border_position_declarations,
-    rtl_children_border_declarations
-  ),
   css_rule('&.ls-block textarea[id^="edit-block-"],\n&.ls-block #mock-text', rtl_editor_text_declarations)
 ])}
 }
@@ -155,12 +119,7 @@ ${nest_css([
   css_rule(content_column_selector_list(' .block-content-wrapper'), '  justify-content: flex-start;'),
   css_rule(content_text_selector_list(), '  direction: ltr !important;'),
   css_rule(content_column_selector_list(' .block-row'), '  flex-direction: row;'),
-  build_row_item_fill_css(),
-  build_children_thread_css(
-    ltr_children_container_declarations,
-    ltr_children_border_position_declarations,
-    ltr_children_border_declarations
-  )
+  build_row_item_fill_css()
 ])}
 }
 `
