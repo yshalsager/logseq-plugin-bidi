@@ -24,14 +24,15 @@ test('flattens nested block trees and ignores tuple children', () => {
   assert.deepEqual(output.map((block) => block.uuid), ['a', 'b', 'c'])
 })
 
-test('page title prefers original name over normalized fields', () => {
+test('page title prefers original and display names over normalized names', () => {
   assert.equal(page_title_from_record({ originalName: 'Original', name: 'name', title: 'Title' }), 'Original')
-  assert.equal(page_title_from_record({ name: 'name', title: 'Title' }), 'name')
+  assert.equal(page_title_from_record({ name: 'name', title: 'Title' }), 'Title')
   assert.equal(page_title_from_record({ title: 'Title' }), 'Title')
   assert.equal(page_title_from_record(null), null)
 })
 
-test('row source uses first non-blank block title field', () => {
-  assert.equal(row_dir_source_text({ content: 'English', title: 'Fallback' }), 'English')
-  assert.equal(row_dir_source_text({ content: '   ', title: 'Fallback' }), 'Fallback')
+test('row source prefers visible block-reference text', () => {
+  assert.equal(row_dir_source_text({ fullTitle: 'Visible عربي', title: '((uuid))', content: 'Legacy' }), 'Visible عربي')
+  assert.equal(row_dir_source_text({ fullTitle: '   ', title: 'Current', content: 'Legacy' }), 'Current')
+  assert.equal(row_dir_source_text({ content: 'Legacy' }), 'Legacy')
 })

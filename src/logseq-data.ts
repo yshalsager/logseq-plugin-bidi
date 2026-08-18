@@ -20,10 +20,10 @@ const first_non_blank_string = (values: Array<string | null>): string | null => 
 
 export const row_dir_source_text = (block: Record<string, unknown>): string => (
   first_non_blank_string([
-    get_record_string(block, 'content'),
-    get_record_string(block, 'title'),
     get_record_string(block, 'fullTitle'),
     get_record_string(block, 'full-title'),
+    get_record_string(block, 'title'),
+    get_record_string(block, 'content'),
     get_record_string(block, 'originalName'),
     get_record_string(block, 'original-name'),
     get_record_string(block, 'name'),
@@ -58,8 +58,8 @@ export const block_id_from_node = (block: BlockNode): string | null => (
 export const page_title_from_record = (page: Record<string, unknown> | null): string | null => (
   page
     ? get_record_string(page, 'originalName') ??
-      get_record_string(page, 'name') ??
-      get_record_string(page, 'title')
+      get_record_string(page, 'title') ??
+      get_record_string(page, 'name')
     : null
 )
 
