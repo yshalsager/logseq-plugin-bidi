@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3] - 2026-08-18
+
+### Fixed
+
+- Preserved Logseq-owned `data-row-dir` attributes on comments-area and full-block renderer rows when native bidi support appears after plugin startup.
+- Removed the obsolete direction cleanup that could interfere with Logseq's native row classification.
+
 ## [0.1.2] - 2026-08-18
 
 ### Fixed

@@ -1,6 +1,6 @@
 {
   "name": "logseq-plugin-bidi",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": true,
   "description": "Bidirectional text and RTL block layout support for modern Logseq builds",
   "main": "dist/index.html",
