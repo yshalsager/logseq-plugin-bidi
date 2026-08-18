@@ -3,7 +3,7 @@ import { infer_text_direction, non_blank_string, type TextDirection } from './di
 import { current_page_title, get_block_content_by_id } from './logseq-data'
 import { create_debounced, type Cleanup } from './runtime-utils'
 
-const block_selector = '.ls-block:not(.is-comments-area):not(:has(> .block-main-container > .block-renderer-container)), .ls-page-title'
+const block_selector = '.ls-block:not(.is-comments-area):not(:has(> .block-main-container > .block-renderer-container)), .ls-page-title, .ls-comment-body .block-content[blockid]'
 const block_main_container_selector = '.ls-block:not(.is-comments-area) > .block-main-container:not(:has(> .block-renderer-container))'
 const content_wrap_selector = ':scope > .block-main-container > .block-main-content-wrap:not(:has(.block-renderer-container)), :scope > .block-main-container > .flex.flex-col.w-full:not(.block-control-wrap):not(.block-renderer-container)'
 const editor_selector = '.editor-inner textarea, #mock-text'

@@ -39,6 +39,7 @@ test('preserves current Logseq row order and excludes full-block renderers', () 
   assert.doesNotMatch(host_pr_parity_style, /^\.ls-block(?!:not\(\.is-comments-area\))/m)
   assert.match(host_pr_parity_style, /\.flex\.flex-col\.w-full:not\(\.block-control-wrap\):not\(\.block-renderer-container\)/)
   assert.match(web_css, /\.ls-block\[blockid="[^"\n]+"\]:not\(:has\(> \.block-main-container > \.block-renderer-container\)\)/)
+  assert.match(web_css, new RegExp(`\\.ls-comment-body \\.block-content\\[blockid="${uuid}"\\] \\{\\n  direction: rtl !important;\\n  text-align: right;`))
 })
 
 test('generated rtl css hides collapse control and owns bullet geometry', () => {

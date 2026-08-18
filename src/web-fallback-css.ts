@@ -33,6 +33,10 @@ const control_selector_list = (block_ids: Array<string>): string => (
   block_ids.map((block_id) => `${block_selector_list([block_id])} #control-${css_identifier_part(block_id)}`).join(',\n')
 )
 
+const comment_content_selector_list = (block_ids: Array<string>): string => (
+  block_ids.map((block_id) => `.ls-comment-body .block-content[blockid="${css_attr_value(block_id)}"]`).join(',\n')
+)
+
 const edit_selector_list = (block_ids: Array<string>): string => (
   block_ids
     .flatMap((block_id) => [
@@ -170,6 +174,10 @@ ${css_rule(content_column_selector_list(block_ids, ' .block-content-wrapper > .b
   max-width: 100%;`)}
 
 ${css_rule(content_text_selector_list(block_ids), '  direction: rtl !important;')}
+
+${css_rule(comment_content_selector_list(block_ids), `  direction: rtl !important;
+  text-align: right;
+  unicode-bidi: plaintext;`)}
 
 ${css_rule(content_column_selector_list(block_ids, ' .block-head-wrap'), '  justify-content: flex-end;')}
 
