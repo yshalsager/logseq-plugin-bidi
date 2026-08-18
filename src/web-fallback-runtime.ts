@@ -19,7 +19,6 @@ const fallback_page_style_key = 'logseq-plugin-bidi-fallback-page-style'
 const fallback_editor_style_key = 'logseq-plugin-bidi-fallback-editor-style'
 
 const fallback_sync_debounce_ms = 120
-const fallback_editor_poll_ms = 400
 const fallback_page_poll_ms = 30000
 const fallback_poll_skip_after_refresh_ms = 10000
 
@@ -129,11 +128,10 @@ const refresh_fallback_editor_style = async (
 
 export const install_fallback_direction_runtime = (settings: BidiSettings): Cleanup => {
   let route_epoch = 0
-  let editor_poll_timer: number | null = null
   const changed_blocks = new Map<string, Record<string, unknown>>()
   const direction_probe = create_text_direction_probe(document)
   const page_runner = create_serialized_runner((error) => {
-    console.error('[logseq-plugin-bidi] fallback page refresh failed', error)
+    console.error('[logseq-plugin-bidi] fallback refresh failed', error)
   })
   const enqueue_page_refresh = (): void => {
     const epoch = route_epoch
@@ -158,16 +156,13 @@ export const install_fallback_direction_runtime = (settings: BidiSettings): Clea
     changed_blocks.clear()
     enqueue_blocks_refresh(blocks)
   }, fallback_sync_debounce_ms)
-  const poll_editor = async (): Promise<void> => {
+  const enqueue_editor_refresh = (): void => {
     const epoch = route_epoch
-    await refresh_fallback_editor_style(
+    page_runner.run(() => refresh_fallback_editor_style(
       settings,
       direction_probe.infer_direction,
       () => page_runner.is_active() && epoch === route_epoch
-    ).catch((error) => {
-      console.error('[logseq-plugin-bidi] fallback editor refresh failed', error)
-    })
-    if (page_runner.is_active()) editor_poll_timer = window.setTimeout(() => { void poll_editor() }, fallback_editor_poll_ms)
+    ))
   }
 
   const off_route_changed = logseq.App.onRouteChanged(() => {
@@ -175,11 +170,13 @@ export const install_fallback_direction_runtime = (settings: BidiSettings): Clea
     changed_blocks.clear()
     debounced_blocks_refresh.cancel()
     debounced_page_refresh.run()
+    enqueue_editor_refresh()
   })
   const off_db_changed = logseq.DB.onChanged((event) => {
     reset_page_ref_cache()
     event.blocks.forEach((block) => changed_blocks.set(String(block.uuid), block))
     debounced_blocks_refresh.run()
+    enqueue_editor_refresh()
   })
   const page_poll_timer = window.setInterval(() => {
     if (Date.now() - last_fallback_page_refresh_ms < fallback_poll_skip_after_refresh_ms) return
@@ -188,7 +185,7 @@ export const install_fallback_direction_runtime = (settings: BidiSettings): Clea
 
   debounced_page_refresh.run()
   const startup_timer = window.setTimeout(() => debounced_page_refresh.run(), 300)
-  void poll_editor()
+  enqueue_editor_refresh()
 
   return () => {
     page_runner.cancel()
@@ -200,7 +197,6 @@ export const install_fallback_direction_runtime = (settings: BidiSettings): Clea
     off_db_changed()
     window.clearInterval(page_poll_timer)
     window.clearTimeout(startup_timer)
-    if (editor_poll_timer !== null) window.clearTimeout(editor_poll_timer)
   }
 }
 
