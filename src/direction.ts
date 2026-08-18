@@ -12,6 +12,7 @@ const checkbox_prefix_regex = /^\[(?: |x|X|-)\]\s*/
 const ordered_list_prefix_regex = /^\d+[.)]\s+/
 const task_marker_prefix_regex = /^(?:TODO|NOW|LATER|DOING|DONE|WAITING|CANCELED|CANCELLED)\b[:：]?\s*/i
 const property_prefix_regex = /^[^:\n]{1,80}::\s*/
+const priority_prefix_regex = /^\[#[A-C]\]\s*/i
 const page_ref_wrapper_regex = /^\[\[([\s\S]+)\]\]$/
 const markdown_link_wrapper_regex = /^\[([\s\S]+)\]\(([\s\S]+)\)$/
 const leading_neutral_prefix_regex = /^[\s\u2022>*-]+/
@@ -45,13 +46,17 @@ const strip_dir_prefixes_once = (text: string): string => (
     .replace(ordered_list_prefix_regex, '')
     .replace(task_marker_prefix_regex, '')
     .replace(property_prefix_regex, '')
+    .replace(priority_prefix_regex, '')
 )
 
 const normalize_text_for_dir = (text: string): string => {
-  const stripped = strip_dir_prefixes_once(text)
-  const unwrapped = unwrap_dir_text_once(stripped).trim()
-  if (stripped === unwrapped) return unwrapped
-  return strip_dir_prefixes_once(unwrapped).trim()
+  let current = text.trim()
+  for (let pass = 0; pass < 8; pass += 1) {
+    const next = strip_dir_prefixes_once(unwrap_dir_text_once(current)).trim()
+    if (next === current) break
+    current = next
+  }
+  return current
 }
 
 const parse_balanced = (

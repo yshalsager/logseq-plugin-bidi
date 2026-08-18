@@ -52,8 +52,15 @@ test('ignores weak characters and scans the full Unicode string', () => {
   assert.equal(infer_direction('ქართული'), 'ltr')
 })
 
-test('ignores common Logseq prefixes before detecting direction', () => {
-  assert.equal(infer_direction('TODO: لغة عربية'), 'rtl')
+test('ignores combined Logseq prefixes in any order', () => {
+  const rtl_examples = [
+    'key:: TODO عربي',
+    'TODO key:: عربي',
+    '- [ ] TODO key:: [#A] عربي',
+    'key:: TODO [[اختبار]]'
+  ]
+
+  rtl_examples.forEach((text) => assert.equal(infer_direction(text), 'rtl', text))
   assert.equal(infer_direction('- *   test'), 'ltr')
 })
 
