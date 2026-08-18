@@ -1,7 +1,7 @@
 import { css_attr_value } from './css-utils'
 import { infer_text_direction, non_blank_string, type TextDirection } from './direction'
 import { current_page_title, get_block_content_by_id } from './logseq-data'
-import { create_debounced, type Cleanup } from './runtime-utils'
+import { create_debounced, create_serialized_runner, type Cleanup } from './runtime-utils'
 
 const block_selector = '.ls-block:not(.is-comments-area):not(:has(> .block-main-container > .block-renderer-container)), .ls-page-title, .ls-comment-body .block-content[blockid]'
 const block_main_container_selector = '.ls-block:not(.is-comments-area) > .block-main-container:not(:has(> .block-renderer-container))'
@@ -60,16 +60,21 @@ const set_block_row_direction = (
   set_main_container_direction(main_container_node, direction)
 }
 
-const sync_host_page_direction = async (graph_document: Document): Promise<void> => {
+const sync_host_page_direction = async (
+  graph_document: Document,
+  is_current: () => boolean
+): Promise<void> => {
   const editing_state = await logseq.Editor.checkEditing().catch(() => false)
+  if (!is_current()) return
+
   const editing_block_id = typeof editing_state === 'string' ? editing_state : null
   const editing_content = editing_block_id
     ? await logseq.Editor.getEditingBlockContent().catch(() => '')
     : null
+  if (!is_current()) return
 
-  const dom_blocks = collect_dom_blocks(graph_document)
   const next_dir_cache = new Map<string, TextDirection>()
-  dom_blocks.forEach(({ block_id, main_container_node, text }) => {
+  const row_directions = collect_dom_blocks(graph_document).map(({ block_id, main_container_node, text }) => {
     const source_text = block_id === editing_block_id
       ? (non_blank_string(editing_content) ? editing_content : text)
       : text
@@ -78,12 +83,17 @@ const sync_host_page_direction = async (graph_document: Document): Promise<void>
       ? infer_text_direction(source_text)
       : cached_direction ?? 'auto'
     next_dir_cache.set(block_id, direction)
+    return { direction, main_container_node }
+  })
+
+  const page_title_direction = infer_text_direction(await current_page_title())
+  if (!is_current()) return
+
+  row_directions.forEach(({ direction, main_container_node }) => {
     set_main_container_direction(main_container_node, direction)
   })
   host_block_dir_cache = next_dir_cache
 
-  const page_title = await current_page_title()
-  const page_title_direction = infer_text_direction(page_title)
   const page_title_dir_attr = page_title_direction === 'auto' ? 'auto' : page_title_direction
   graph_document.querySelectorAll('.ls-page-title').forEach((node) => {
     node.setAttribute('dir', page_title_dir_attr)
@@ -132,10 +142,22 @@ const apply_auto_dir = (graph_document: Document): void => {
 }
 
 export const install_host_direction_runtime = (graph_document: Document): Cleanup => {
-  const debounced_sync = create_debounced(() => {
-    apply_auto_dir(graph_document)
-    void sync_host_page_direction(graph_document)
-  }, observer_debounce_ms)
+  let route_epoch = 0
+  let removed_editor_request_id = 0
+  const latest_editor_requests = new Map<string, number>()
+  const sync_runner = create_serialized_runner((error) => {
+    console.error('[logseq-plugin-bidi] host direction sync failed', error)
+  })
+  const enqueue_sync = (): void => {
+    const epoch = route_epoch
+    sync_runner.run(async () => {
+      const is_current = (): boolean => sync_runner.is_active() && epoch === route_epoch
+      if (!is_current()) return
+      apply_auto_dir(graph_document)
+      await sync_host_page_direction(graph_document, is_current)
+    })
+  }
+  const debounced_sync = create_debounced(enqueue_sync, observer_debounce_ms)
 
   const observer = new MutationObserver((mutations) => {
     const removed_editor_block_ids = new Set<string>()
@@ -144,13 +166,15 @@ export const install_host_direction_runtime = (graph_document: Document): Cleanu
       mutation.addedNodes.forEach((node) => apply_editor_auto_dir_to_node(node))
 
       const block_id = removed_editor_block_id(mutation)
-      if (!block_id) return
-
-      removed_editor_block_ids.add(block_id)
+      if (block_id) removed_editor_block_ids.add(block_id)
     })
 
     removed_editor_block_ids.forEach((block_id) => {
+      const epoch = route_epoch
+      const request_id = ++removed_editor_request_id
+      latest_editor_requests.set(block_id, request_id)
       void get_block_content_by_id(block_id).then((content) => {
+        if (!sync_runner.is_active() || epoch !== route_epoch || latest_editor_requests.get(block_id) !== request_id) return
         const direction = infer_text_direction(content)
         host_block_dir_cache.set(block_id, direction)
         set_block_row_direction(graph_document, block_id, direction)
@@ -167,18 +191,25 @@ export const install_host_direction_runtime = (graph_document: Document): Cleanu
     subtree: true
   })
 
-  const off_route_changed = logseq.App.onRouteChanged(() => debounced_sync.run())
+  const off_route_changed = logseq.App.onRouteChanged(() => {
+    route_epoch += 1
+    latest_editor_requests.clear()
+    debounced_sync.run()
+  })
   const off_db_changed = logseq.DB.onChanged(() => debounced_sync.run())
 
   apply_auto_dir(graph_document)
   debounced_sync.run()
-  window.setTimeout(() => debounced_sync.run(), 300)
+  const startup_timer = window.setTimeout(() => debounced_sync.run(), 300)
 
   return () => {
+    sync_runner.cancel()
     debounced_sync.cancel()
+    latest_editor_requests.clear()
     observer.disconnect()
     off_route_changed()
     off_db_changed()
+    window.clearTimeout(startup_timer)
     host_block_dir_cache = new Map<string, TextDirection>()
   }
 }
