@@ -12,12 +12,13 @@ import {
   css_attr_value,
   css_identifier_part
 } from './css-utils'
+import { host_pr_parity_style } from './host-css'
 
 const uuid = '69e6aaae-a0e9-4df8-aa55-1961e7c03f28'
 
 test('escapes attribute values without changing uuid selectors', () => {
   assert.equal(css_attr_value(uuid), uuid)
-  assert.match(build_rtl_blocks_css([uuid]), new RegExp(`\\.ls-block\\[blockid="${uuid}"\\] > \\.block-main-container \\{`))
+  assert.match(build_rtl_blocks_css([uuid]), new RegExp(`\\.ls-block\\[blockid="${uuid}"\\]:not\\(:has\\(> \\.block-main-container > \\.block-renderer-container\\)\\) > \\.block-main-container \\{`))
 })
 
 test('escapes prefixed id selector fragments without corrupting leading digits', () => {
@@ -25,6 +26,19 @@ test('escapes prefixed id selector fragments without corrupting leading digits',
   const css = build_editor_override_css(uuid, 'rtl')
   assert.match(css, new RegExp(`#control-${uuid} \\{\\n  display: none;\\n\\}`))
   assert.match(css, new RegExp(`#edit-block-${uuid},\\n#editor-edit-block-${uuid} #mock-text \\{`))
+})
+
+test('preserves current Logseq row order and excludes full-block renderers', () => {
+  const web_css = build_rtl_blocks_css([uuid])
+
+  assert.doesNotMatch(host_pr_parity_style, /\border:/)
+  assert.doesNotMatch(web_css, /\border:/)
+  assert.match(host_pr_parity_style, /flex-direction: row-reverse;/)
+  assert.match(web_css, /flex-direction: row-reverse;/)
+  assert.match(host_pr_parity_style, /\.block-main-container:not\(:has\(> \.block-renderer-container\)\)/)
+  assert.doesNotMatch(host_pr_parity_style, /^\.ls-block(?!:not\(\.is-comments-area\))/m)
+  assert.match(host_pr_parity_style, /\.flex\.flex-col\.w-full:not\(\.block-control-wrap\):not\(\.block-renderer-container\)/)
+  assert.match(web_css, /\.ls-block\[blockid="[^"\n]+"\]:not\(:has\(> \.block-main-container > \.block-renderer-container\)\)/)
 })
 
 test('generated rtl css hides collapse control and owns bullet geometry', () => {
@@ -39,7 +53,7 @@ test('base style can include or omit web fallback css', () => {
   const desktop_css = build_base_style(false)
   const web_css = build_base_style(true)
 
-  assert.match(desktop_css, /\.ls-block > \.block-main-container/)
+  assert.match(desktop_css, /\.ls-block:not\(\.is-comments-area\) > \.block-main-container/)
   assert.doesNotMatch(desktop_css, /\.editor-inner textarea,\n#mock-text/)
   assert.match(web_css, /\.editor-inner textarea,\n#mock-text/)
   assert.match(web_css, /\.page-reference \{\n  direction: ltr;\n  unicode-bidi: isolate;/)

@@ -3,9 +3,9 @@ import { infer_text_direction, non_blank_string, type TextDirection } from './di
 import { current_page_title, get_block_content_by_id } from './logseq-data'
 import { create_debounced, type Cleanup } from './runtime-utils'
 
-const block_selector = '.ls-block, .ls-page-title'
-const block_main_container_selector = '.ls-block > .block-main-container'
-const content_wrap_selector = ':scope > .block-main-container > .block-main-content-wrap, :scope > .block-main-container > .flex.flex-col.w-full:not(.block-control-wrap)'
+const block_selector = '.ls-block:not(.is-comments-area):not(:has(> .block-main-container > .block-renderer-container)), .ls-page-title'
+const block_main_container_selector = '.ls-block:not(.is-comments-area) > .block-main-container:not(:has(> .block-renderer-container))'
+const content_wrap_selector = ':scope > .block-main-container > .block-main-content-wrap:not(:has(.block-renderer-container)), :scope > .block-main-container > .flex.flex-col.w-full:not(.block-control-wrap):not(.block-renderer-container)'
 const editor_selector = '.editor-inner textarea, #mock-text'
 const observer_debounce_ms = 40
 
@@ -14,11 +14,11 @@ let host_block_dir_cache = new Map<string, TextDirection>()
 const collect_dom_blocks = (graph_document: Document): Array<{ block_id: string; main_container_node: Element; text: string }> => {
   const blocks: Array<{ block_id: string; main_container_node: Element; text: string }> = []
 
-  graph_document.querySelectorAll('.ls-block[blockid]').forEach((node) => {
+  graph_document.querySelectorAll('.ls-block[blockid]:not(.is-comments-area)').forEach((node) => {
     const block_id = node.getAttribute('blockid')
     if (!block_id) return
 
-    const main_container_node = node.querySelector(':scope > .block-main-container')
+    const main_container_node = node.querySelector(':scope > .block-main-container:not(:has(> .block-renderer-container))')
     if (!main_container_node) return
 
     const content_wrap = node.querySelector(content_wrap_selector)
@@ -53,8 +53,8 @@ const set_block_row_direction = (
   block_id: string,
   direction: TextDirection
 ): void => {
-  const block_node = graph_document.querySelector(`.ls-block[blockid="${css_attr_value(block_id)}"]`)
-  const main_container_node = block_node?.querySelector(':scope > .block-main-container')
+  const block_node = graph_document.querySelector(`.ls-block[blockid="${css_attr_value(block_id)}"]:not(.is-comments-area)`)
+  const main_container_node = block_node?.querySelector(':scope > .block-main-container:not(:has(> .block-renderer-container))')
   if (!main_container_node) return
 
   set_main_container_direction(main_container_node, direction)
@@ -123,6 +123,12 @@ const apply_auto_dir = (graph_document: Document): void => {
   graph_document.querySelectorAll(block_selector).forEach((node) => set_dir_auto(node))
   graph_document.querySelectorAll(block_main_container_selector).forEach((node) => set_dir_auto(node))
   graph_document.querySelectorAll(editor_selector).forEach((node) => set_editor_dir_auto(node))
+  graph_document.querySelectorAll('.ls-block:is(.is-comments-area, :has(> .block-main-container > .block-renderer-container))').forEach((node) => {
+    node.removeAttribute('dir')
+    const main_container = node.querySelector(':scope > .block-main-container')
+    main_container?.removeAttribute('dir')
+    main_container?.removeAttribute('data-row-dir')
+  })
 }
 
 export const install_host_direction_runtime = (graph_document: Document): Cleanup => {

@@ -52,7 +52,7 @@ test('web fallback css targets only rtl fixture blocks and preserves bullets', (
   assert.match(css, /#control-arabic,/)
   assert.match(css, /#control-arabic-page-ref-uuid,/)
   assert.match(css, /#control-nested-rtl-child \{\n  display: none;\n\}/)
-  assert.match(css, /\.ls-block\[blockid="nested-rtl-child"\] > \.block-main-container > \.block-control-wrap/)
+  assert.match(css, /\.ls-block\[blockid="nested-rtl-child"\]:not\(:has\(> \.block-main-container > \.block-renderer-container\)\) > \.block-main-container > \.block-control-wrap/)
   assert.match(css, /\.bullet-link-wrap \{\n  display: inline-flex !important;/)
   assert.match(css, /\.bullet-container \.bullet \{\n  display: block !important;/)
   assert.doesNotMatch(css, /#control-english\b/)

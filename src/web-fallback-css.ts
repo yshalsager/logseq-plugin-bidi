@@ -26,11 +26,11 @@ export const web_text_fallback_style = `
 `
 
 const block_selector_list = (block_ids: Array<string>, suffix = ''): string => (
-  block_ids.map((block_id) => `.ls-block[blockid="${css_attr_value(block_id)}"]${suffix}`).join(',\n')
+  block_ids.map((block_id) => `.ls-block[blockid="${css_attr_value(block_id)}"]:not(:has(> .block-main-container > .block-renderer-container))${suffix}`).join(',\n')
 )
 
 const control_selector_list = (block_ids: Array<string>): string => (
-  block_ids.map((block_id) => `#control-${css_identifier_part(block_id)}`).join(',\n')
+  block_ids.map((block_id) => `${block_selector_list([block_id])} #control-${css_identifier_part(block_id)}`).join(',\n')
 )
 
 const edit_selector_list = (block_ids: Array<string>): string => (
@@ -44,8 +44,8 @@ const edit_selector_list = (block_ids: Array<string>): string => (
 
 const content_column_selector_list = (block_ids: Array<string>, suffix = ''): string => (
   [
-    block_selector_list(block_ids, ` > .block-main-container > .block-main-content-wrap${suffix}`),
-    block_selector_list(block_ids, ` > .block-main-container > .flex.flex-col.w-full:not(.block-control-wrap)${suffix}`)
+    block_selector_list(block_ids, ` > .block-main-container > .block-main-content-wrap:not(:has(.block-renderer-container))${suffix}`),
+    block_selector_list(block_ids, ` > .block-main-container > .flex.flex-col.w-full:not(.block-control-wrap):not(.block-renderer-container)${suffix}`)
   ].join(',\n')
 )
 
@@ -57,16 +57,16 @@ const content_text_selector_list = (block_ids: Array<string>): string => (
     '.block-head-wrap'
   ]
     .flatMap((suffix) => [
-      block_selector_list(block_ids, ` > .block-main-container > .block-main-content-wrap ${suffix}`),
-      block_selector_list(block_ids, ` > .block-main-container > .flex.flex-col.w-full:not(.block-control-wrap) ${suffix}`)
+      block_selector_list(block_ids, ` > .block-main-container > .block-main-content-wrap:not(:has(.block-renderer-container)) ${suffix}`),
+      block_selector_list(block_ids, ` > .block-main-container > .flex.flex-col.w-full:not(.block-control-wrap):not(.block-renderer-container) ${suffix}`)
     ])
     .join(',\n')
 )
 
 const block_row_item_selector_list = (block_ids: Array<string>, suffix: string): string => (
   [
-    block_selector_list(block_ids, ` > .block-main-container > .block-main-content-wrap .block-row > ${suffix}`),
-    block_selector_list(block_ids, ` > .block-main-container > .flex.flex-col.w-full:not(.block-control-wrap) .block-row > ${suffix}`)
+    block_selector_list(block_ids, ` > .block-main-container > .block-main-content-wrap:not(:has(.block-renderer-container)) .block-row > ${suffix}`),
+    block_selector_list(block_ids, ` > .block-main-container > .flex.flex-col.w-full:not(.block-control-wrap):not(.block-renderer-container) .block-row > ${suffix}`)
   ].join(',\n')
 )
 
@@ -113,8 +113,7 @@ export const build_rtl_blocks_css = (block_ids: Array<string>): string => {
 ${css_rule(block_selector_list(block_ids, ' > .block-main-container'), `${row_ltr_declarations}
 ${rtl_row_layout_declarations}`)}
 
-${css_rule(block_selector_list(block_ids, ' > .block-main-container > .block-control-wrap'), `  order: 2;
-  flex: 0 0 16px;
+${css_rule(block_selector_list(block_ids, ' > .block-main-container > .block-control-wrap'), `  flex: 0 0 16px;
   width: 16px;
   justify-content: center;
   align-self: flex-start;
@@ -160,8 +159,7 @@ ${css_rule(block_selector_list(block_ids, ' > .block-main-container > .block-con
   border-radius: 9999px;
   background-color: var(--lx-gray-08, var(--ls-block-bullet-color, var(--rx-gray-08))) !important;`)}
 
-${css_rule(content_column_selector_list(block_ids), `  order: 1;
-  flex: 1 1 0%;
+${css_rule(content_column_selector_list(block_ids), `  flex: 1 1 0%;
   width: auto !important;
   min-width: 0;`)}
 
@@ -213,8 +211,7 @@ const build_ltr_block_css = (block_id: string): string => {
   return `
 ${css_rule(block_selector_list(block_ids, ' > .block-main-container'), row_ltr_declarations)}
 
-${css_rule(block_selector_list(block_ids, ' > .block-main-container > .block-control-wrap'), `  order: 1;
-  flex: initial;
+${css_rule(block_selector_list(block_ids, ' > .block-main-container > .block-control-wrap'), `  flex: initial;
   width: auto;
   justify-content: initial;
   align-self: initial;
@@ -223,8 +220,7 @@ ${css_rule(block_selector_list(block_ids, ' > .block-main-container > .block-con
 
 ${css_rule(control_selector_list(block_ids), '  display: inline-flex;')}
 
-${css_rule(content_column_selector_list(block_ids), `  order: 2;
-  flex: initial;
+${css_rule(content_column_selector_list(block_ids), `  flex: initial;
   width: 100%;
   min-width: 0;`)}
 

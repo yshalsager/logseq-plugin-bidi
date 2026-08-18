@@ -2,7 +2,7 @@ export const row_ltr_declarations = `  direction: ltr;
   flex-direction: row;
   unicode-bidi: isolate;`
 
-export const rtl_row_layout_declarations = `  flex-direction: row;
+export const rtl_row_layout_declarations = `  flex-direction: row-reverse;
   gap: 0;
   column-gap: 0;`
 
