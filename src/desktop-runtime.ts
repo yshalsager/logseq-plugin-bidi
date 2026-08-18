@@ -1,3 +1,4 @@
+import { text_direction_override } from './direction'
 import { type Cleanup } from './runtime-utils'
 
 const outline_block_selector = '.ls-block:not(.is-comments-area):not([data-is-property]):not([data-query]):not([data-transclude]):not([data-embed]):not(:has(> .block-main-container > .block-renderer-container))'
@@ -11,9 +12,19 @@ ${outline_block_selector} .block-title-wrap,
 #mock-text`
 
 const excluded_block_selector = '.ls-block:is(.is-comments-area, :has(> .block-main-container > .block-renderer-container))'
+const override_block_selector = `${outline_block_selector}[data-block-title]`
 
 const set_dir_auto = (node: Element): void => {
   if (node.getAttribute('dir') !== 'auto') node.setAttribute('dir', 'auto')
+}
+
+const apply_block_override = (block: Element): void => {
+  const direction = text_direction_override(block.getAttribute('data-block-title') ?? '')
+  if (!direction) return
+
+  block.querySelectorAll(auto_dir_selector).forEach((node) => {
+    if (node.closest('.ls-block') === block) node.setAttribute('dir', direction)
+  })
 }
 
 const clear_excluded_block_direction = (node: Element): void => {
@@ -32,15 +43,24 @@ const apply_auto_dir_to_node = (node: Node): void => {
 
   if (element.matches(excluded_block_selector)) clear_excluded_block_direction(element)
   element.querySelectorAll(excluded_block_selector).forEach(clear_excluded_block_direction)
+
+  const parent_block = element.closest(override_block_selector)
+  if (parent_block) apply_block_override(parent_block)
+  element.querySelectorAll(override_block_selector).forEach(apply_block_override)
 }
 
 export const install_host_direction_runtime = (graph_document: Document): Cleanup => {
   apply_auto_dir_to_node(graph_document.documentElement)
 
   const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => mutation.addedNodes.forEach(apply_auto_dir_to_node))
+    mutations.forEach((mutation) => {
+      if (mutation.type === 'attributes') apply_auto_dir_to_node(mutation.target)
+      else mutation.addedNodes.forEach(apply_auto_dir_to_node)
+    })
   })
   observer.observe(graph_document.documentElement ?? graph_document, {
+    attributeFilter: ['data-block-title'],
+    attributes: true,
     childList: true,
     subtree: true
   })

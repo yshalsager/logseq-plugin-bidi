@@ -1,4 +1,4 @@
-import { create_text_direction_probe, non_blank_string, type DirectionResolver } from './direction'
+import { create_text_direction_probe, non_blank_string, resolve_text_direction, type DirectionResolver } from './direction'
 import {
   current_page_title,
   get_block_content_by_id,
@@ -119,7 +119,7 @@ const refresh_fallback_editor_style = async (
     : await get_block_content_by_id(editing_state)
   if (!is_current()) return
 
-  const direction = infer_direction(source_text)
+  const direction = resolve_text_direction(source_text, infer_direction)
   const style = direction === 'rtl' || direction === 'ltr'
     ? build_editor_override_css(editing_state, direction)
     : ''

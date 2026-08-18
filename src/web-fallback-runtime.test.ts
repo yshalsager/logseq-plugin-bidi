@@ -21,6 +21,8 @@ test('collects rtl block ids from page-reference-only blocks', async () => {
     { uuid: 'rtl', content: '[[اختبار]]' },
     { uuid: 'target-label-rtl', content: '[[69ebc529-f796-4bf7-a828-8a8ab3044a66][اختبار]]' },
     { uuid: 'block-ref-rtl', title: '((69ebc529-f796-4bf7-a828-8a8ab3044a66))', fullTitle: 'اختبار' },
+    { uuid: 'forced-rtl', content: 'direction:: rtl\nEnglish' },
+    { uuid: 'forced-ltr', content: 'direction:: ltr\nعربي' },
     {
       uuid: 'parent',
       content: 'Parent',
@@ -30,7 +32,7 @@ test('collects rtl block ids from page-reference-only blocks', async () => {
     }
   ], async () => null, infer_direction)
 
-  assert.deepEqual(block_ids, ['rtl', 'target-label-rtl', 'block-ref-rtl', 'child-rtl'])
+  assert.deepEqual(block_ids, ['rtl', 'target-label-rtl', 'block-ref-rtl', 'forced-rtl', 'child-rtl'])
 })
 
 test('resolves uuid-only page references before collecting rtl blocks', async () => {

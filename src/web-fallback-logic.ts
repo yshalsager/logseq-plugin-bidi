@@ -1,5 +1,6 @@
 import {
   extract_page_ref_spans,
+  resolve_text_direction,
   type DirectionResolver,
   type TextDirection
 } from './direction'
@@ -49,7 +50,7 @@ const infer_web_fallback_block_direction = async (
   resolve_page_ref: PageRefResolver,
   infer_direction: DirectionResolver
 ): Promise<TextDirection> => {
-  const direction = infer_direction(source_text)
+  const direction = resolve_text_direction(source_text, infer_direction)
   if (direction === 'rtl' || !source_text.includes('[[')) return direction
 
   const page_refs = extract_page_ref_spans(source_text)

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { create_text_direction_probe, extract_page_ref_spans } from './direction'
+import { create_text_direction_probe, extract_page_ref_spans, resolve_text_direction } from './direction'
 
 const first_strong_direction = (text: string): 'rtl' | 'ltr' | null => {
   for (const char of text) {
@@ -71,6 +71,12 @@ test('infers direction from visible link and page-reference labels', () => {
   assert.equal(infer_direction('[[69ebc529-f796-4bf7-a828-8a8ab3044a66][Test]]'), 'ltr')
   assert.equal(infer_direction('[اختبار](https://example.com)'), 'rtl')
   assert.equal(infer_direction('[Test](https://example.com/اختبار)'), 'ltr')
+})
+
+test('manual direction property overrides automatic inference', () => {
+  assert.equal(resolve_text_direction('direction:: ltr\nعربي', infer_direction), 'ltr')
+  assert.equal(resolve_text_direction('direction:: RTL\nEnglish', infer_direction), 'rtl')
+  assert.equal(resolve_text_direction('direction:: auto\nعربي', infer_direction), 'rtl')
 })
 
 test('extracts page-reference targets and visible labels', () => {

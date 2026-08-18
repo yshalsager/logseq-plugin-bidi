@@ -17,12 +17,25 @@ const page_ref_wrapper_regex = /^\[\[([\s\S]+)\]\]$/
 const markdown_link_wrapper_regex = /^\[([\s\S]+)\]\(([\s\S]+)\)$/
 const leading_neutral_prefix_regex = /^[\s\u2022>*-]+/
 const maybe_inline_markup_regex = /[()\[\]]/
+const direction_override_regex = /^\s*direction::\s*(rtl|ltr|auto)\s*$/im
 
 const max_text_dir_cache_size = 2000
 
 export const non_blank_string = (value: unknown): value is string => (
   typeof value === 'string' && value.trim().length > 0
 )
+
+export const text_direction_override = (text: string): TextDirection | null => {
+  const value = text.match(direction_override_regex)?.[1]?.toLowerCase()
+  return value === 'rtl' || value === 'ltr' || value === 'auto' ? value : null
+}
+
+export const resolve_text_direction = (text: string, infer_direction: DirectionResolver): TextDirection => {
+  const override = text_direction_override(text)
+  return override === 'rtl' || override === 'ltr'
+    ? override
+    : infer_direction(text.replace(direction_override_regex, ''))
+}
 
 const unwrap_dir_text_once = (text: string): string => {
   const page_ref_match = text.match(page_ref_wrapper_regex)
