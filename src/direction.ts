@@ -1,5 +1,5 @@
 export type TextDirection = 'rtl' | 'ltr' | 'auto'
-type StrongTextDirection = 'rtl' | 'ltr'
+export type DirectionResolver = (text: string) => TextDirection
 
 type PageRefSpan = {
   end_idx: number
@@ -7,9 +7,6 @@ type PageRefSpan = {
   start_idx: number
   target: string
 }
-
-const rtl_char_regex = /[\u0590-\u08FF\uFB1D-\uFDFD\uFE70-\uFEFC]/
-const ltr_char_regex = /[A-Za-z\u00C0-\u024F\u0370-\u03FF\u0400-\u052F]/
 
 const checkbox_prefix_regex = /^\[(?: |x|X|-)\]\s*/
 const ordered_list_prefix_regex = /^\d+[.)]\s+/
@@ -20,20 +17,10 @@ const markdown_link_wrapper_regex = /^\[([\s\S]+)\]\(([\s\S]+)\)$/
 const leading_neutral_prefix_regex = /^[\s\u2022>*-]+/
 const maybe_inline_markup_regex = /[()\[\]]/
 
-const max_dir_sample_length = 512
-const max_first_strong_scan_length = 256
 const max_text_dir_cache_size = 2000
-
-const text_dir_cache = new Map<string, TextDirection>()
 
 export const non_blank_string = (value: unknown): value is string => (
   typeof value === 'string' && value.trim().length > 0
-)
-
-const sample_dir_text = (text: string): string => (
-  text.length > max_dir_sample_length
-    ? text.slice(0, max_dir_sample_length)
-    : text
 )
 
 const unwrap_dir_text_once = (text: string): string => {
@@ -65,31 +52,6 @@ const normalize_text_for_dir = (text: string): string => {
   const unwrapped = unwrap_dir_text_once(stripped).trim()
   if (stripped === unwrapped) return unwrapped
   return strip_dir_prefixes_once(unwrapped).trim()
-}
-
-const first_strong_char_dir = (text: string): StrongTextDirection | null => {
-  const length = Math.min(text.length, max_first_strong_scan_length)
-  for (let i = 0; i < length; i += 1) {
-    const char = text[i]
-    if (rtl_char_regex.test(char)) return 'rtl'
-    if (ltr_char_regex.test(char)) return 'ltr'
-  }
-  return null
-}
-
-const infer_text_dir_helper = (text: string): TextDirection => {
-  if (!text) return 'auto'
-
-  let rtl_count = 0
-  let ltr_count = 0
-  for (const char of text) {
-    if (rtl_char_regex.test(char)) rtl_count += 1
-    else if (ltr_char_regex.test(char)) ltr_count += 1
-  }
-
-  if (rtl_count === 0 && ltr_count === 0) return 'auto'
-  if (rtl_count === ltr_count) return 'auto'
-  return rtl_count > ltr_count ? 'rtl' : 'ltr'
 }
 
 const parse_balanced = (
@@ -202,31 +164,54 @@ const extract_visible_inline_text = (text: string): string => {
   return parts.join('').trim()
 }
 
-const infer_text_direction_uncached = (sampled: string): TextDirection => {
-  const normalized = normalize_text_for_dir(sampled)
-  const first_strong_dir = first_strong_char_dir(normalized)
-  const inferred_dir = first_strong_dir ?? infer_text_dir_helper(normalized)
-  const should_parse_inline = inferred_dir === 'auto' && maybe_inline_markup_regex.test(normalized)
+export const create_text_direction_probe = (target_document: Document): {
+  cleanup: () => void
+  infer_direction: DirectionResolver
+} => {
+  const container = target_document.createElement('div')
+  container.style.cssText = 'position:fixed;left:-10000px;top:-10000px;visibility:hidden;pointer-events:none;'
 
-  if (!should_parse_inline) return inferred_dir
-
-  const visible_text = normalize_text_for_dir(extract_visible_inline_text(normalized))
-  const fallback_first_strong = first_strong_char_dir(visible_text)
-  return fallback_first_strong ?? infer_text_dir_helper(visible_text)
-}
-
-export const infer_text_direction = (text: string): TextDirection => {
-  const sampled = sample_dir_text(text || '')
-  const cached = text_dir_cache.get(sampled)
-  if (cached) return cached
-
-  const inferred = infer_text_direction_uncached(sampled)
-  text_dir_cache.set(sampled, inferred)
-
-  if (text_dir_cache.size > max_text_dir_cache_size) {
-    const first_key = text_dir_cache.keys().next().value as string | undefined
-    if (first_key) text_dir_cache.delete(first_key)
+  const create_probe = (parent_direction: 'ltr' | 'rtl'): HTMLElement => {
+    const parent = target_document.createElement('div')
+    const probe = target_document.createElement('span')
+    parent.dir = parent_direction
+    probe.dir = 'auto'
+    parent.append(probe)
+    container.append(parent)
+    return probe
   }
 
-  return inferred
+  const ltr_probe = create_probe('ltr')
+  const rtl_probe = create_probe('rtl')
+  const cache = new Map<string, TextDirection>()
+  ;(target_document.body ?? target_document.documentElement).append(container)
+
+  const infer_direction = (text: string): TextDirection => {
+    const normalized = normalize_text_for_dir(text || '')
+    const visible_text = maybe_inline_markup_regex.test(normalized)
+      ? normalize_text_for_dir(extract_visible_inline_text(normalized))
+      : normalized
+    if (!visible_text) return 'auto'
+
+    const cached = cache.get(visible_text)
+    if (cached) return cached
+
+    ltr_probe.textContent = visible_text
+    rtl_probe.textContent = visible_text
+    const view = target_document.defaultView
+    const ltr_direction = view?.getComputedStyle(ltr_probe).direction
+    const rtl_direction = view?.getComputedStyle(rtl_probe).direction
+    const direction = ltr_direction === rtl_direction && (ltr_direction === 'ltr' || ltr_direction === 'rtl')
+      ? ltr_direction
+      : 'auto'
+
+    cache.set(visible_text, direction)
+    if (cache.size > max_text_dir_cache_size) cache.delete(cache.keys().next().value as string)
+    return direction
+  }
+
+  return {
+    cleanup: () => container.remove(),
+    infer_direction
+  }
 }

@@ -1,5 +1,5 @@
 import { css_attr_value } from './css-utils'
-import { infer_text_direction, non_blank_string, type TextDirection } from './direction'
+import { create_text_direction_probe, non_blank_string, type DirectionResolver, type TextDirection } from './direction'
 import { current_page_title, get_block_content_by_id } from './logseq-data'
 import { create_debounced, create_serialized_runner, type Cleanup } from './runtime-utils'
 
@@ -62,6 +62,7 @@ const set_block_row_direction = (
 
 const sync_host_page_direction = async (
   graph_document: Document,
+  infer_direction: DirectionResolver,
   is_current: () => boolean
 ): Promise<void> => {
   const editing_state = await logseq.Editor.checkEditing().catch(() => false)
@@ -80,13 +81,13 @@ const sync_host_page_direction = async (
       : text
     const cached_direction = host_block_dir_cache.get(block_id)
     const direction = non_blank_string(source_text)
-      ? infer_text_direction(source_text)
+      ? infer_direction(source_text)
       : cached_direction ?? 'auto'
     next_dir_cache.set(block_id, direction)
     return { direction, main_container_node }
   })
 
-  const page_title_direction = infer_text_direction(await current_page_title())
+  const page_title_direction = infer_direction(await current_page_title())
   if (!is_current()) return
 
   row_directions.forEach(({ direction, main_container_node }) => {
@@ -145,6 +146,7 @@ export const install_host_direction_runtime = (graph_document: Document): Cleanu
   let route_epoch = 0
   let removed_editor_request_id = 0
   const latest_editor_requests = new Map<string, number>()
+  const direction_probe = create_text_direction_probe(graph_document)
   const sync_runner = create_serialized_runner((error) => {
     console.error('[logseq-plugin-bidi] host direction sync failed', error)
   })
@@ -154,7 +156,7 @@ export const install_host_direction_runtime = (graph_document: Document): Cleanu
       const is_current = (): boolean => sync_runner.is_active() && epoch === route_epoch
       if (!is_current()) return
       apply_auto_dir(graph_document)
-      await sync_host_page_direction(graph_document, is_current)
+      await sync_host_page_direction(graph_document, direction_probe.infer_direction, is_current)
     })
   }
   const debounced_sync = create_debounced(enqueue_sync, observer_debounce_ms)
@@ -175,7 +177,7 @@ export const install_host_direction_runtime = (graph_document: Document): Cleanu
       latest_editor_requests.set(block_id, request_id)
       void get_block_content_by_id(block_id).then((content) => {
         if (!sync_runner.is_active() || epoch !== route_epoch || latest_editor_requests.get(block_id) !== request_id) return
-        const direction = infer_text_direction(content)
+        const direction = direction_probe.infer_direction(content)
         host_block_dir_cache.set(block_id, direction)
         set_block_row_direction(graph_document, block_id, direction)
       })
@@ -204,6 +206,7 @@ export const install_host_direction_runtime = (graph_document: Document): Cleanu
 
   return () => {
     sync_runner.cancel()
+    direction_probe.cleanup()
     debounced_sync.cancel()
     latest_editor_requests.clear()
     observer.disconnect()

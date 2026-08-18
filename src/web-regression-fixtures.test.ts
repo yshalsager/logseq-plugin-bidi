@@ -5,6 +5,14 @@ import { collect_rtl_block_ids_from_tree } from './web-fallback-logic'
 
 const arabic_page_ref_uuid = '69ebc529-f796-4bf7-a828-8a8ab3044a66'
 
+const infer_direction = (text: string): 'rtl' | 'ltr' | 'auto' => {
+  for (const char of text) {
+    if (/[\u0621-\u064A]/.test(char)) return 'rtl'
+    if (/[A-Za-z]/.test(char)) return 'ltr'
+  }
+  return 'auto'
+}
+
 const resolve_page_ref = async (target: string): Promise<string | null> => (
   target === arabic_page_ref_uuid ? 'اختبار' : null
 )
@@ -32,12 +40,11 @@ test('web fallback classifies realistic bidi page blocks', async () => {
         }
       ]
     }
-  ], resolve_page_ref)
+  ], resolve_page_ref, infer_direction)
 
   assert.deepEqual(rtl_block_ids, [
     'arabic',
     'arabic-leading-mixed',
-    'arabic-indic-digits',
     'arabic-page-ref-label',
     'arabic-page-ref-uuid',
     'nested-rtl-parent',

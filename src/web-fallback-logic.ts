@@ -1,6 +1,6 @@
 import {
   extract_page_ref_spans,
-  infer_text_direction,
+  type DirectionResolver,
   type TextDirection
 } from './direction'
 import {
@@ -46,35 +46,37 @@ export const resolve_page_refs_in_text = async (
 
 const infer_web_fallback_block_direction = async (
   source_text: string,
-  resolve_page_ref: PageRefResolver
+  resolve_page_ref: PageRefResolver,
+  infer_direction: DirectionResolver
 ): Promise<TextDirection> => {
-  const direction = infer_text_direction(source_text)
+  const direction = infer_direction(source_text)
   if (direction === 'rtl' || !source_text.includes('[[')) return direction
 
   const page_refs = extract_page_ref_spans(source_text)
   if (!page_refs.length) return direction
 
   const text_before_first_ref = source_text.slice(0, page_refs[0].start_idx)
-  const prefix_direction = infer_text_direction(text_before_first_ref)
+  const prefix_direction = infer_direction(text_before_first_ref)
   if (prefix_direction !== 'auto') return direction
 
   const resolved_text = await resolve_page_refs_in_text(source_text, resolve_page_ref, page_refs)
   if (resolved_text === source_text) return direction
 
-  const resolved_direction = infer_text_direction(resolved_text)
+  const resolved_direction = infer_direction(resolved_text)
   return resolved_direction === 'auto' ? direction : resolved_direction
 }
 
 export const collect_rtl_block_ids_from_tree = async (
   blocks: Array<unknown>,
-  resolve_page_ref: PageRefResolver
+  resolve_page_ref: PageRefResolver,
+  infer_direction: DirectionResolver
 ): Promise<Array<string>> => {
   const block_ids = await Promise.all(flatten_block_tree(blocks).map(async (block) => {
     const block_id = block_id_from_node(block)
     if (!block_id) return null
 
     const source_text = row_dir_source_text(block)
-    const direction = await infer_web_fallback_block_direction(source_text, resolve_page_ref)
+    const direction = await infer_web_fallback_block_direction(source_text, resolve_page_ref, infer_direction)
     return direction === 'rtl' ? block_id : null
   }))
   return block_ids.filter((block_id): block_id is string => typeof block_id === 'string')
@@ -83,12 +85,13 @@ export const collect_rtl_block_ids_from_tree = async (
 export const update_rtl_block_ids = async (
   rtl_block_ids: Set<string>,
   changed_blocks: Array<unknown>,
-  resolve_page_ref: PageRefResolver
+  resolve_page_ref: PageRefResolver,
+  infer_direction: DirectionResolver
 ): Promise<void> => {
   const changed_ids = flatten_block_tree(changed_blocks)
     .map(block_id_from_node)
     .filter((block_id): block_id is string => block_id !== null)
-  const changed_rtl_ids = new Set(await collect_rtl_block_ids_from_tree(changed_blocks, resolve_page_ref))
+  const changed_rtl_ids = new Set(await collect_rtl_block_ids_from_tree(changed_blocks, resolve_page_ref, infer_direction))
 
   changed_ids.forEach((block_id) => {
     if (changed_rtl_ids.has(block_id)) rtl_block_ids.add(block_id)

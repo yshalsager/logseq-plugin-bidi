@@ -7,6 +7,14 @@ import {
   update_rtl_block_ids
 } from './web-fallback-logic'
 
+const infer_direction = (text: string): 'rtl' | 'ltr' | 'auto' => {
+  for (const char of text) {
+    if (/[\u0621-\u064A]/.test(char)) return 'rtl'
+    if (/[A-Za-z]/.test(char)) return 'ltr'
+  }
+  return 'auto'
+}
+
 test('collects rtl block ids from page-reference-only blocks', async () => {
   const block_ids = await collect_rtl_block_ids_from_tree([
     { uuid: 'ltr', content: '[[Test]]' },
@@ -19,7 +27,7 @@ test('collects rtl block ids from page-reference-only blocks', async () => {
         { uuid: 'child-rtl', content: '[اختبار](https://example.com)' }
       ]
     }
-  ], async () => null)
+  ], async () => null, infer_direction)
 
   assert.deepEqual(block_ids, ['rtl', 'target-label-rtl', 'child-rtl'])
 })
@@ -37,7 +45,7 @@ test('resolves uuid-only page references before collecting rtl blocks', async ()
   const block_ids = await collect_rtl_block_ids_from_tree([
     { uuid: 'uuid-page-ref', content: '[[69ebc529-f796-4bf7-a828-8a8ab3044a66]]' },
     { uuid: 'english-before-ref', content: 'See [[69ebc529-f796-4bf7-a828-8a8ab3044a66]]' }
-  ], resolve_page_ref)
+  ], resolve_page_ref, infer_direction)
 
   assert.deepEqual(block_ids, ['uuid-page-ref'])
 })
@@ -60,7 +68,7 @@ test('caches repeated page reference resolution', async () => {
   const block_ids = await collect_rtl_block_ids_from_tree([
     { uuid: 'first', content: '[[69ebc529-f796-4bf7-a828-8a8ab3044a66]]' },
     { uuid: 'second', content: '[[69ebc529-f796-4bf7-a828-8a8ab3044a66]]' }
-  ], cached_resolver)
+  ], cached_resolver, infer_direction)
 
   assert.deepEqual(block_ids, ['first', 'second'])
   assert.equal(calls, 1)
@@ -72,7 +80,7 @@ test('updates only changed block directions', async () => {
   await update_rtl_block_ids(rtl_block_ids, [
     { uuid: 'changed-to-ltr', content: 'English now' },
     { uuid: 'changed-to-rtl', content: 'عربي الآن' }
-  ], async () => null)
+  ], async () => null, infer_direction)
 
   assert.deepEqual([...rtl_block_ids].sort(), ['changed-to-rtl', 'unchanged-rtl'])
 })
@@ -87,7 +95,7 @@ test('skips page reference resolution when prefix already fixes direction', asyn
   const block_ids = await collect_rtl_block_ids_from_tree([
     { uuid: 'english-before-ref', content: 'See [[69ebc529-f796-4bf7-a828-8a8ab3044a66]]' },
     { uuid: 'arabic-before-ref', content: 'عربي [[69ebc529-f796-4bf7-a828-8a8ab3044a66]]' }
-  ], resolve_page_ref)
+  ], resolve_page_ref, infer_direction)
 
   assert.deepEqual(block_ids, ['arabic-before-ref'])
   assert.equal(calls, 0)

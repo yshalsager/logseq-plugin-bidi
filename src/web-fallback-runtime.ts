@@ -1,4 +1,4 @@
-import { infer_text_direction, non_blank_string } from './direction'
+import { create_text_direction_probe, non_blank_string, type DirectionResolver } from './direction'
 import {
   current_page_title,
   get_block_content_by_id,
@@ -64,16 +64,17 @@ const current_fallback_page_style = (): string => (
 
 const refresh_fallback_page_style = async (
   settings: BidiSettings,
+  infer_direction: DirectionResolver,
   is_current: () => boolean
 ): Promise<void> => {
   last_fallback_page_refresh_ms = Date.now()
   const blocks = await read_current_page_blocks_tree(settings)
   if (!is_current()) return
 
-  const rtl_block_ids = await collect_rtl_block_ids_from_tree(blocks, resolve_page_ref)
+  const rtl_block_ids = await collect_rtl_block_ids_from_tree(blocks, resolve_page_ref, infer_direction)
   if (!is_current()) return
 
-  const page_title_direction = infer_text_direction(await current_page_title())
+  const page_title_direction = infer_direction(await current_page_title())
   if (!is_current()) return
 
   fallback_rtl_block_ids = new Set(rtl_block_ids)
@@ -85,10 +86,11 @@ const refresh_fallback_page_style = async (
 const refresh_changed_blocks = async (
   blocks: Array<unknown>,
   settings: BidiSettings,
+  infer_direction: DirectionResolver,
   is_current: () => boolean
 ): Promise<void> => {
   const next_rtl_block_ids = new Set(fallback_rtl_block_ids)
-  await update_rtl_block_ids(next_rtl_block_ids, blocks, resolve_page_ref)
+  await update_rtl_block_ids(next_rtl_block_ids, blocks, resolve_page_ref, infer_direction)
   if (!is_current()) return
 
   fallback_rtl_block_ids = next_rtl_block_ids
@@ -98,6 +100,7 @@ const refresh_changed_blocks = async (
 
 const refresh_fallback_editor_style = async (
   settings: BidiSettings,
+  infer_direction: DirectionResolver,
   is_current: () => boolean
 ): Promise<void> => {
   const editing_state = await logseq.Editor.checkEditing().catch(() => false)
@@ -116,7 +119,7 @@ const refresh_fallback_editor_style = async (
     : await get_block_content_by_id(editing_state)
   if (!is_current()) return
 
-  const direction = infer_text_direction(source_text)
+  const direction = infer_direction(source_text)
   const style = direction === 'rtl' || direction === 'ltr'
     ? build_editor_override_css(editing_state, direction)
     : ''
@@ -128,6 +131,7 @@ export const install_fallback_direction_runtime = (settings: BidiSettings): Clea
   let route_epoch = 0
   let editor_poll_timer: number | null = null
   const changed_blocks = new Map<string, Record<string, unknown>>()
+  const direction_probe = create_text_direction_probe(document)
   const page_runner = create_serialized_runner((error) => {
     console.error('[logseq-plugin-bidi] fallback page refresh failed', error)
   })
@@ -135,6 +139,7 @@ export const install_fallback_direction_runtime = (settings: BidiSettings): Clea
     const epoch = route_epoch
     page_runner.run(() => refresh_fallback_page_style(
       settings,
+      direction_probe.infer_direction,
       () => page_runner.is_active() && epoch === route_epoch
     ))
   }
@@ -143,6 +148,7 @@ export const install_fallback_direction_runtime = (settings: BidiSettings): Clea
     page_runner.run(() => refresh_changed_blocks(
       blocks,
       settings,
+      direction_probe.infer_direction,
       () => page_runner.is_active() && epoch === route_epoch
     ))
   }
@@ -156,6 +162,7 @@ export const install_fallback_direction_runtime = (settings: BidiSettings): Clea
     const epoch = route_epoch
     await refresh_fallback_editor_style(
       settings,
+      direction_probe.infer_direction,
       () => page_runner.is_active() && epoch === route_epoch
     ).catch((error) => {
       console.error('[logseq-plugin-bidi] fallback editor refresh failed', error)
@@ -185,6 +192,7 @@ export const install_fallback_direction_runtime = (settings: BidiSettings): Clea
 
   return () => {
     page_runner.cancel()
+    direction_probe.cleanup()
     debounced_page_refresh.cancel()
     debounced_blocks_refresh.cancel()
     changed_blocks.clear()
