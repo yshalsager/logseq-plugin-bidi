@@ -1,6 +1,8 @@
+import type { BlockEntity, PageEntity } from '@logseq/libs/dist/LSPlugin'
 import { log_debug, type BidiSettings } from './settings'
 
-export type BlockNode = Record<string, unknown>
+export type BlockNode = Partial<BlockEntity> & Record<string, unknown>
+type PageNode = (Partial<PageEntity> | Partial<BlockEntity>) & Record<string, unknown>
 
 const is_record = (value: unknown): value is Record<string, unknown> => (
   typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -18,7 +20,7 @@ const first_non_blank_string = (values: Array<string | null>): string | null => 
   return null
 }
 
-export const row_dir_source_text = (block: Record<string, unknown>): string => (
+export const row_dir_source_text = (block: BlockNode): string => (
   first_non_blank_string([
     get_record_string(block, 'fullTitle'),
     get_record_string(block, 'full-title'),
@@ -31,6 +33,22 @@ export const row_dir_source_text = (block: Record<string, unknown>): string => (
     get_record_string(block, 'raw-title')
   ]) ?? ''
 )
+
+const is_block_uuid_tuple = (value: unknown): value is ['uuid', string] => (
+  Array.isArray(value) && value.length === 2 && value[0] === 'uuid' && typeof value[1] === 'string'
+)
+
+export const resolve_block_tree_tuples = async (
+  blocks: Array<unknown>,
+  resolve_block: (uuid: string) => Promise<BlockNode | null>
+): Promise<Array<unknown>> => Promise.all(blocks.map(async (block) => {
+  if (is_block_uuid_tuple(block)) {
+    const resolved = await resolve_block(block[1])
+    return resolved ? (await resolve_block_tree_tuples([resolved], resolve_block))[0] : null
+  }
+  if (!is_record(block) || !Array.isArray(block.children)) return block
+  return { ...block, children: await resolve_block_tree_tuples(block.children, resolve_block) }
+})).then((resolved) => resolved.filter((block) => block !== null))
 
 const append_flattened_block_tree = (blocks: Array<unknown>, output: Array<BlockNode>): void => {
   blocks.forEach((block) => {
@@ -55,7 +73,7 @@ export const block_id_from_node = (block: BlockNode): string | null => (
   get_record_string(block, 'uuid') ?? get_record_string(block, 'block/uuid')
 )
 
-export const page_title_from_record = (page: Record<string, unknown> | null): string | null => (
+export const page_title_from_record = (page: PageNode | null): string | null => (
   page
     ? get_record_string(page, 'originalName') ??
       get_record_string(page, 'title') ??
@@ -63,20 +81,27 @@ export const page_title_from_record = (page: Record<string, unknown> | null): st
     : null
 )
 
-const page_identity_from_record = (page: Record<string, unknown> | null): string | null => (
+const page_identity_from_record = (page: PageNode | null): string | null => (
   page ? get_record_string(page, 'uuid') ?? page_title_from_record(page) : null
 )
 
 export const read_current_page_blocks_tree = async (settings: BidiSettings): Promise<Array<unknown>> => {
+  const resolve_tuples = (blocks: Array<unknown>): Promise<Array<unknown>> => resolve_block_tree_tuples(
+    blocks,
+    (uuid) => logseq.Editor.getBlock(uuid, { includeChildren: true }).catch((error) => {
+      log_debug(settings, `getBlock tuple fallback failed: ${String(error)}`)
+      return null
+    })
+  )
   const current_page_blocks = await logseq.Editor.getCurrentPageBlocksTree().catch((error) => {
     log_debug(settings, `getCurrentPageBlocksTree failed: ${String(error)}`)
     return null
   })
-  if (Array.isArray(current_page_blocks) && current_page_blocks.length > 0) return current_page_blocks
+  if (Array.isArray(current_page_blocks) && current_page_blocks.length > 0) return resolve_tuples(current_page_blocks)
 
   const current_page = await logseq.Editor.getCurrentPage().catch((error) => {
     log_debug(settings, `getCurrentPage failed: ${String(error)}`)
-    return null as Record<string, unknown> | null
+    return null as PageNode | null
   })
   const page_identity = page_identity_from_record(current_page)
   if (!page_identity) return Array.isArray(current_page_blocks) ? current_page_blocks : []
@@ -85,16 +110,16 @@ export const read_current_page_blocks_tree = async (settings: BidiSettings): Pro
     log_debug(settings, `getPageBlocksTree fallback failed: ${String(error)}`)
     return null
   })
-  return Array.isArray(page_blocks) ? page_blocks : []
+  return Array.isArray(page_blocks) ? resolve_tuples(page_blocks) : []
 }
 
 export const current_page_title = async (): Promise<string> => {
-  const current_page = await logseq.Editor.getCurrentPage().catch(() => null as Record<string, unknown> | null)
+  const current_page = await logseq.Editor.getCurrentPage().catch(() => null as PageNode | null)
   return page_title_from_record(current_page) ?? ''
 }
 
 export const get_block_content_by_id = async (block_id: string): Promise<string> => {
-  const block = await logseq.Editor.getBlock(block_id).catch(() => null as Record<string, unknown> | null)
+  const block = await logseq.Editor.getBlock(block_id).catch(() => null as BlockNode | null)
   if (!block || !is_record(block)) return ''
   return row_dir_source_text(block)
 }

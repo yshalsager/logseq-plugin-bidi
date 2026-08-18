@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { block_id_from_node, flatten_block_tree, page_title_from_record, row_dir_source_text } from './logseq-data'
+import { block_id_from_node, flatten_block_tree, page_title_from_record, resolve_block_tree_tuples, row_dir_source_text } from './logseq-data'
 
 test('block id reads current and namespaced uuid fields', () => {
   assert.equal(block_id_from_node({ uuid: 'plain' }), 'plain')
@@ -22,6 +22,14 @@ test('flattens nested block trees and ignores tuple children', () => {
   ])
 
   assert.deepEqual(output.map((block) => block.uuid), ['a', 'b', 'c'])
+})
+
+test('resolves SDK block UUID tuples before flattening', async () => {
+  const tree = await resolve_block_tree_tuples([
+    { uuid: 'parent', children: [['uuid', 'child']] }
+  ], async (uuid) => uuid === 'child' ? { uuid, title: 'عربي' } : null)
+
+  assert.deepEqual(flatten_block_tree(tree).map((block) => block.uuid), ['parent', 'child'])
 })
 
 test('page title prefers original and display names over normalized names', () => {
