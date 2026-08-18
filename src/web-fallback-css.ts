@@ -29,10 +29,6 @@ const block_selector_list = (block_ids: Array<string>, suffix = ''): string => (
   block_ids.map((block_id) => `.ls-block[blockid="${css_attr_value(block_id)}"]:not(:has(> .block-main-container > .block-renderer-container))${suffix}`).join(',\n')
 )
 
-const control_selector_list = (block_ids: Array<string>): string => (
-  block_ids.map((block_id) => `${block_selector_list([block_id])} #control-${css_identifier_part(block_id)}`).join(',\n')
-)
-
 const comment_content_selector_list = (block_ids: Array<string>): string => (
   block_ids.map((block_id) => `.ls-comment-body .block-content[blockid="${css_attr_value(block_id)}"]`).join(',\n')
 )
@@ -117,52 +113,6 @@ export const build_rtl_blocks_css = (block_ids: Array<string>): string => {
 ${css_rule(block_selector_list(block_ids, ' > .block-main-container'), `${row_ltr_declarations}
 ${rtl_row_layout_declarations}`)}
 
-${css_rule(block_selector_list(block_ids, ' > .block-main-container > .block-control-wrap'), `  flex: 0 0 16px;
-  width: 16px;
-  justify-content: center;
-  align-self: flex-start;
-  padding-inline: 0;
-  flex-direction: row;
-  gap: 0;
-  opacity: 1;
-  visibility: visible;`)}
-
-${css_rule(control_selector_list(block_ids), '  display: none;')}
-
-${css_rule(block_selector_list(block_ids, ' > .block-main-container > .block-control-wrap > .bullet-link-wrap'), `  display: inline-flex !important;
-  opacity: 1;
-  visibility: visible;
-  width: 16px;
-  min-width: 16px;
-  height: 24px;
-  justify-content: center;
-  align-items: center;
-  margin: 0;
-  padding: 0;
-  position: static;`)}
-
-${css_rule(block_selector_list(block_ids, ' > .block-main-container > .block-control-wrap > .bullet-link-wrap .bullet-container'), `  display: inline-flex !important;
-  opacity: 1;
-  visibility: visible;
-  width: 16px !important;
-  min-width: 16px !important;
-  height: 16px !important;
-  flex: 0 0 16px;
-  align-items: center;
-  justify-content: center;
-  align-self: center;
-  margin: 0;
-  padding: 0;
-  line-height: 1;`)}
-
-${css_rule(block_selector_list(block_ids, ' > .block-main-container > .block-control-wrap > .bullet-link-wrap .bullet-container .bullet'), `  display: block !important;
-  opacity: 0.8;
-  width: 6px !important;
-  height: 6px !important;
-  min-width: 6px !important;
-  border-radius: 9999px;
-  background-color: var(--lx-gray-08, var(--ls-block-bullet-color, var(--rx-gray-08))) !important;`)}
-
 ${css_rule(content_column_selector_list(block_ids), `  flex: 1 1 0%;
   width: auto !important;
   min-width: 0;`)}
@@ -218,15 +168,6 @@ const build_ltr_block_css = (block_id: string): string => {
 
   return `
 ${css_rule(block_selector_list(block_ids, ' > .block-main-container'), row_ltr_declarations)}
-
-${css_rule(block_selector_list(block_ids, ' > .block-main-container > .block-control-wrap'), `  flex: initial;
-  width: auto;
-  justify-content: initial;
-  align-self: initial;
-  padding-inline: initial;
-  flex-direction: row;`)}
-
-${css_rule(control_selector_list(block_ids), '  display: inline-flex;')}
 
 ${css_rule(content_column_selector_list(block_ids), `  flex: initial;
   width: 100%;

@@ -46,15 +46,13 @@ test('web fallback classifies realistic bidi page blocks', async () => {
   ])
 })
 
-test('web fallback css targets only rtl fixture blocks and preserves bullets', () => {
+test('web fallback css targets only rtl fixture blocks and preserves native controls', () => {
   const css = build_rtl_blocks_css(['arabic', 'arabic-page-ref-uuid', 'nested-rtl-child'])
 
-  assert.match(css, /#control-arabic,/)
-  assert.match(css, /#control-arabic-page-ref-uuid,/)
-  assert.match(css, /#control-nested-rtl-child \{\n  display: none;\n\}/)
-  assert.match(css, /\.ls-block\[blockid="nested-rtl-child"\]:not\(:has\(> \.block-main-container > \.block-renderer-container\)\) > \.block-main-container > \.block-control-wrap/)
-  assert.match(css, /\.bullet-link-wrap \{\n  display: inline-flex !important;/)
-  assert.match(css, /\.bullet-container \.bullet \{\n  display: block !important;/)
-  assert.doesNotMatch(css, /#control-english\b/)
-  assert.doesNotMatch(css, /#control-english-leading-mixed\b/)
+  assert.match(css, /\.ls-block\[blockid="arabic"\]/)
+  assert.match(css, /\.ls-block\[blockid="arabic-page-ref-uuid"\]/)
+  assert.match(css, /\.ls-block\[blockid="nested-rtl-child"\]:not\(:has\(> \.block-main-container > \.block-renderer-container\)\) > \.block-main-container/)
+  assert.doesNotMatch(css, /#control-|\.bullet-link-wrap|\.bullet-container/)
+  assert.doesNotMatch(css, /\.ls-block\[blockid="english"\]/)
+  assert.doesNotMatch(css, /\.ls-block\[blockid="english-leading-mixed"\]/)
 })

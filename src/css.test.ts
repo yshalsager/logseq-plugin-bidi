@@ -24,7 +24,6 @@ test('escapes attribute values without changing uuid selectors', () => {
 test('escapes prefixed id selector fragments without corrupting leading digits', () => {
   assert.equal(css_identifier_part(uuid), uuid)
   const css = build_editor_override_css(uuid, 'rtl')
-  assert.match(css, new RegExp(`#control-${uuid} \\{\\n  display: none;\\n\\}`))
   assert.match(css, new RegExp(`#edit-block-${uuid},\\n#editor-edit-block-${uuid} #mock-text \\{`))
 })
 
@@ -42,12 +41,10 @@ test('preserves current Logseq row order and excludes full-block renderers', () 
   assert.match(web_css, new RegExp(`\\.ls-comment-body \\.block-content\\[blockid="${uuid}"\\] \\{\\n  direction: rtl !important;\\n  text-align: right;`))
 })
 
-test('generated rtl css hides collapse control and owns bullet geometry', () => {
-  const css = build_rtl_blocks_css([uuid])
-  assert.match(css, new RegExp(`#control-${uuid} \\{\\n  display: none;\\n\\}`))
-  assert.match(css, /\.bullet-link-wrap \{\n  display: inline-flex !important;/)
-  assert.match(css, /\.bullet-container \.bullet \{\n  display: block !important;/)
-  assert.doesNotMatch(css, /#control-\\69/)
+test('bidi css preserves native block controls', () => {
+  const css = host_pr_parity_style + build_rtl_blocks_css([uuid])
+  assert.doesNotMatch(css, /#control-|\.bullet-link-wrap|\.bullet-container|\.control-hide/)
+  assert.doesNotMatch(css, /> \.block-control-wrap \{/)
 })
 
 test('base style can include or omit web fallback css', () => {
@@ -71,7 +68,6 @@ test('editor override css uses safe block selectors for both directions', () => 
   const ltr_css = build_editor_override_css(uuid, 'ltr')
 
   assert.match(rtl_css, new RegExp(`#edit-block-${uuid},\\n#editor-edit-block-${uuid} #mock-text \\{`))
-  assert.match(rtl_css, new RegExp(`#control-${uuid} \\{\\n  display: none;\\n\\}`))
-  assert.match(ltr_css, new RegExp(`#control-${uuid} \\{\\n  display: inline-flex;\\n\\}`))
+  assert.doesNotMatch(rtl_css + ltr_css, /#control-|\.bullet-link-wrap|\.bullet-container/)
   assert.doesNotMatch(rtl_css + ltr_css, /#edit-block-\\69/)
 })

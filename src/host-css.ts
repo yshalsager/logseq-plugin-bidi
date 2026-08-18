@@ -27,15 +27,6 @@ ${row_ltr_declarations}
 ${rtl_row_layout_declarations}
 }
 
-.ls-block:not(.is-comments-area) > .block-main-container:not(:has(> .block-renderer-container)):is([data-row-dir="rtl"], :has(textarea:dir(rtl)), :has(#mock-text:dir(rtl))) > .block-control-wrap {
-  padding-inline: 0;
-  flex-direction: row;
-}
-
-.ls-block:not(.is-comments-area) > .block-main-container:not(:has(> .block-renderer-container)):is([data-row-dir="rtl"], :has(textarea:dir(rtl)), :has(#mock-text:dir(rtl))) > .block-control-wrap > .block-control:has(.control-hide) {
-  display: none;
-}
-
 .ls-block:not(.is-comments-area) > .block-main-container:is([data-row-dir="rtl"], :has(textarea:dir(rtl)), :has(#mock-text:dir(rtl))) > .block-main-content-wrap:not(:has(.block-renderer-container)) .block-content-wrapper,
 .ls-block:not(.is-comments-area) > .block-main-container:is([data-row-dir="rtl"], :has(textarea:dir(rtl)), :has(#mock-text:dir(rtl))) > .flex.flex-col.w-full:not(.block-control-wrap):not(.block-renderer-container) .block-content-wrapper {
   justify-content: flex-end;
