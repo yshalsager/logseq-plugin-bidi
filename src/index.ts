@@ -1,5 +1,6 @@
 import '@logseq/libs'
 import { build_base_style } from './base-css'
+import { install_block_direction_menu } from './block-direction-menu'
 import {
   get_graph_document,
   has_native_bidi_support,
@@ -64,6 +65,7 @@ const main = async (): Promise<void> => {
   logseq.useSettingsSchema(settings_schema)
 
   restart_runtime()
+  const cleanup_block_direction_menu = install_block_direction_menu()
 
   const off_settings_changed = logseq.onSettingsChanged(() => {
     restart_runtime()
@@ -71,6 +73,7 @@ const main = async (): Promise<void> => {
 
   logseq.beforeunload(async () => {
     off_settings_changed()
+    cleanup_block_direction_menu()
     clear_runtime()
     logseq.provideStyle({ key: style_key, style: '' })
   })

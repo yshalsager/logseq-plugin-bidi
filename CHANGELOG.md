@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- Added native block context-menu actions for automatic, right-to-left, and left-to-right direction overrides.
+
 ## [0.1.4] - 2026-08-18
 
 ### Fixed
