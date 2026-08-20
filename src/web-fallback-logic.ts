@@ -70,14 +70,15 @@ const infer_web_fallback_block_direction = async (
 export const collect_rtl_block_ids_from_tree = async (
   blocks: Array<unknown>,
   resolve_page_ref: PageRefResolver,
-  infer_direction: DirectionResolver
+  infer_direction: DirectionResolver,
+  overrides = new Map<string, TextDirection>()
 ): Promise<Array<string>> => {
   const block_ids = await Promise.all(flatten_block_tree(blocks).map(async (block) => {
     const block_id = block_id_from_node(block)
-    if (!block_id) return null
+    if (!block_id || Object.keys(block).some((key) => key.endsWith('/created-from-property'))) return null
 
     const source_text = row_dir_source_text(block)
-    const direction = await infer_web_fallback_block_direction(source_text, resolve_page_ref, infer_direction)
+    const direction = overrides.get(block_id) ?? await infer_web_fallback_block_direction(source_text, resolve_page_ref, infer_direction)
     return direction === 'rtl' ? block_id : null
   }))
   return block_ids.filter((block_id): block_id is string => typeof block_id === 'string')
@@ -90,6 +91,7 @@ export const update_rtl_block_ids = async (
   infer_direction: DirectionResolver
 ): Promise<void> => {
   const changed_ids = flatten_block_tree(changed_blocks)
+    .filter((block) => !Object.keys(block).some((key) => key.endsWith('/created-from-property')))
     .map(block_id_from_node)
     .filter((block_id): block_id is string => block_id !== null)
   const changed_rtl_ids = new Set(await collect_rtl_block_ids_from_tree(changed_blocks, resolve_page_ref, infer_direction))

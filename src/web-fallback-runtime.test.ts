@@ -86,6 +86,12 @@ test('updates only changed block directions', async () => {
   ], async () => null, infer_direction)
 
   assert.deepEqual([...rtl_block_ids].sort(), ['changed-to-rtl', 'unchanged-rtl'])
+  assert.deepEqual(await collect_rtl_block_ids_from_tree(
+    [{ uuid: 'db-property-rtl', title: 'English' }],
+    async () => null,
+    infer_direction,
+    new Map([['db-property-rtl', 'rtl']])
+  ), ['db-property-rtl'])
 })
 
 test('skips page reference resolution when prefix already fixes direction', async () => {

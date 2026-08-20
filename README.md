@@ -12,7 +12,7 @@ This plugin ports the important behavior from [Logseq PR #12526](https://github.
 - Delegates Unicode first-strong direction detection to the browser.
 - Uses `dir="auto"` and `:dir(rtl)` on desktop when the graph DOM is accessible.
 - Uses Logseq API data plus compact block-id-targeted CSS on Logseq web, where the plugin iframe cannot access the host DOM.
-- Adds block context-menu actions for automatic, right-to-left, and left-to-right direction; stores forced choices as the existing `direction::` block property.
+- Adds block context-menu actions for automatic, right-to-left, and left-to-right direction; stores forced choices as a hidden Logseq block property.
 - Keeps settings minimal; the only plugin setting is debug logging.
 
 ## Development Note
@@ -35,10 +35,10 @@ Debug logging reports which runtime is active when enabled. Web row mirroring de
 Right-click a block's bullet and choose:
 
 - **Automatic direction** to remove the override and return to first-strong detection.
-- **Right-to-left direction** to store `direction:: rtl`.
-- **Left-to-right direction** to store `direction:: ltr`.
+- **Right-to-left direction** to force RTL.
+- **Left-to-right direction** to force LTR.
 
-The property remains ordinary Logseq data, so it can also be edited or removed directly.
+Context-menu overrides are stored as hidden Logseq properties so they do not clutter the block. Manually written `direction:: rtl`, `direction:: ltr`, and `direction:: auto` properties remain supported.
 
 ## Development
 

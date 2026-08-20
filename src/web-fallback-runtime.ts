@@ -3,7 +3,8 @@ import {
   current_page_title,
   get_block_content_by_id,
   page_title_from_record,
-  read_current_page_blocks_tree
+  read_current_page_blocks_tree,
+  read_direction_overrides
 } from './logseq-data'
 import { create_debounced, create_serialized_runner, type Cleanup } from './runtime-utils'
 import { log_debug, type BidiSettings } from './settings'
@@ -70,7 +71,7 @@ const refresh_fallback_page_style = async (
   const blocks = await read_current_page_blocks_tree(settings)
   if (!is_current()) return
 
-  const rtl_block_ids = await collect_rtl_block_ids_from_tree(blocks, resolve_page_ref, infer_direction)
+  const rtl_block_ids = await collect_rtl_block_ids_from_tree(blocks, resolve_page_ref, infer_direction, await read_direction_overrides())
   if (!is_current()) return
 
   const page_title_direction = infer_direction(await current_page_title())

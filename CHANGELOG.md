@@ -4,7 +4,7 @@
 
 ### Added
 
-- Added native block context-menu actions for automatic, right-to-left, and left-to-right direction overrides.
+- Added native block context-menu actions for automatic, right-to-left, and left-to-right direction overrides, stored as hidden Logseq properties.
 
 ## [0.1.4] - 2026-08-18
 

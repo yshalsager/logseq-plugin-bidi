@@ -1,4 +1,5 @@
 import type { BlockEntity, PageEntity } from '@logseq/libs/dist/LSPlugin'
+import { type TextDirection } from './direction'
 import { log_debug, type BidiSettings } from './settings'
 
 export type BlockNode = Partial<BlockEntity> & Record<string, unknown>
@@ -18,6 +19,17 @@ const first_non_blank_string = (values: Array<string | null>): string | null => 
     if (value && value.trim().length > 0) return value
   }
   return null
+}
+
+export const read_direction_overrides = async (): Promise<Map<string, TextDirection>> => {
+  const rows = await logseq.DB.datascriptQuery<Array<[string, TextDirection]>>(`
+    [:find ?uuid ?direction
+     :where
+     [?b :block/uuid ?uuid]
+     [?b :plugin.property.logseq-plugin-bidi/direction ?value]
+     [?value :block/title ?direction]]
+  `).catch(() => [])
+  return new Map(rows.filter(([, direction]) => direction === 'rtl' || direction === 'ltr'))
 }
 
 export const row_dir_source_text = (block: BlockNode): string => (

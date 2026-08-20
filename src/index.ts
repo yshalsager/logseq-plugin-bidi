@@ -65,7 +65,7 @@ const main = async (): Promise<void> => {
   logseq.useSettingsSchema(settings_schema)
 
   restart_runtime()
-  const cleanup_block_direction_menu = install_block_direction_menu()
+  const cleanup_block_direction_menu = install_block_direction_menu(restart_runtime)
 
   const off_settings_changed = logseq.onSettingsChanged(() => {
     restart_runtime()
