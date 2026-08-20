@@ -5,6 +5,7 @@ import {
 } from './base-css'
 import {
   build_editor_override_css,
+  build_override_badges_css,
   build_page_title_css,
   build_rtl_blocks_css
 } from './web-fallback-css'
@@ -87,6 +88,13 @@ test('base style can include or omit web fallback css', () => {
   assert.match(web_css, /\.editor-inner textarea,\n#mock-text/)
   assert.match(web_css, /\.page-reference \{\n  unicode-bidi: isolate;/)
   assert.doesNotMatch(web_css, /\.page-reference \{\n  direction:/)
+})
+
+test('override badges identify forced direction without custom theme styling', () => {
+  const css = build_override_badges_css(new Map([[uuid, 'rtl'], ['ltr-id', 'ltr']]))
+  assert.match(css, /content: "RTL";/)
+  assert.match(css, /content: "LTR";/)
+  assert.doesNotMatch(css, /background:|color:|border:/)
 })
 
 test('page title css is only generated for rtl titles', () => {

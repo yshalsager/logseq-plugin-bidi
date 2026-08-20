@@ -1,5 +1,6 @@
 import { css_attr_value, css_identifier_part, css_rule } from './css-utils'
 import {
+  override_badge_declarations,
   row_item_fill_declarations,
   row_ltr_declarations,
   rtl_children_border_declarations,
@@ -93,6 +94,19 @@ const build_children_thread_css = (
 ].join('\n\n')
 
 const nest_css = (rules: Array<string>): string => rules.join('\n\n').replace(/^/gm, '  ')
+
+export const build_override_badges_css = (overrides: Map<string, 'rtl' | 'ltr' | 'auto'>): string => (
+  (['rtl', 'ltr'] as const).map((direction) => {
+    const block_ids = [...overrides].filter(([, value]) => value === direction).map(([block_id]) => block_id)
+    return block_ids.length ? `
+${bidi_target_selector(block_ids)} {
+${nest_css([
+  css_rule(content_column_selector_list(' .block-head-wrap > .w-full::after'), override_badge_declarations(`"${direction.toUpperCase()}"`))
+])}
+}
+` : ''
+  }).join('')
+)
 
 export const build_rtl_blocks_css = (block_ids: Array<string>): string => {
   if (!block_ids.length) return ''

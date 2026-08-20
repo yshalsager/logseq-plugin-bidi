@@ -38,7 +38,7 @@ Right-click a block's bullet and choose:
 - **Right-to-left direction** to force RTL.
 - **Left-to-right direction** to force LTR.
 
-Context-menu overrides are stored as hidden Logseq properties so they do not clutter the block. Manually written `direction:: rtl`, `direction:: ltr`, and `direction:: auto` properties remain supported.
+Context-menu overrides are stored as hidden Logseq properties and shown by a subtle RTL/LTR badge beside the block text. Manually written `direction:: rtl`, `direction:: ltr`, and `direction:: auto` properties remain supported.
 
 ## Development
 

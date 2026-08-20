@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- Added a subtle RTL/LTR badge to blocks with a manual direction override.
+
 ## [0.1.5] - 2026-08-20
 
 ### Added

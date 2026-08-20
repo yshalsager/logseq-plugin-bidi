@@ -1,4 +1,4 @@
-import { create_text_direction_probe, non_blank_string, resolve_text_direction, type DirectionResolver } from './direction'
+import { create_text_direction_probe, non_blank_string, resolve_text_direction, type DirectionResolver, type TextDirection } from './direction'
 import {
   current_page_title,
   get_block_content_by_id,
@@ -14,7 +14,7 @@ import {
   update_rtl_block_ids,
   type PageRefResolver
 } from './web-fallback-logic'
-import { build_editor_override_css, build_page_title_css, build_rtl_blocks_css } from './web-fallback-css'
+import { build_editor_override_css, build_override_badges_css, build_page_title_css, build_rtl_blocks_css } from './web-fallback-css'
 
 const fallback_page_style_key = 'logseq-plugin-bidi-fallback-page-style'
 const fallback_editor_style_key = 'logseq-plugin-bidi-fallback-editor-style'
@@ -27,6 +27,7 @@ let fallback_editor_style_cache = ''
 let fallback_page_style_cache = ''
 let fallback_page_title_style = ''
 let fallback_rtl_block_ids = new Set<string>()
+let fallback_direction_overrides = new Map<string, TextDirection>()
 let last_fallback_page_refresh_ms = 0
 
 const uuid_regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -59,7 +60,7 @@ const set_fallback_editor_style = (style: string): void => {
 }
 
 const current_fallback_page_style = (): string => (
-  [fallback_page_title_style, build_rtl_blocks_css([...fallback_rtl_block_ids])].join('\n')
+  [fallback_page_title_style, build_rtl_blocks_css([...fallback_rtl_block_ids]), build_override_badges_css(fallback_direction_overrides)].join('\n')
 )
 
 const refresh_fallback_page_style = async (
@@ -71,13 +72,15 @@ const refresh_fallback_page_style = async (
   const blocks = await read_current_page_blocks_tree(settings)
   if (!is_current()) return
 
-  const rtl_block_ids = await collect_rtl_block_ids_from_tree(blocks, resolve_page_ref, infer_direction, await read_direction_overrides())
+  const direction_overrides = await read_direction_overrides()
+  const rtl_block_ids = await collect_rtl_block_ids_from_tree(blocks, resolve_page_ref, infer_direction, direction_overrides)
   if (!is_current()) return
 
   const page_title_direction = infer_direction(await current_page_title())
   if (!is_current()) return
 
   fallback_rtl_block_ids = new Set(rtl_block_ids)
+  fallback_direction_overrides = direction_overrides
   fallback_page_title_style = build_page_title_css(page_title_direction)
   log_debug(settings, `fallback page scan: rtl=${rtl_block_ids.length}`)
   set_fallback_page_style(current_fallback_page_style())
@@ -206,6 +209,7 @@ export const clear_fallback_styles = (): void => {
   fallback_editor_style_cache = ''
   fallback_page_title_style = ''
   fallback_rtl_block_ids = new Set<string>()
+  fallback_direction_overrides = new Map<string, TextDirection>()
   last_fallback_page_refresh_ms = 0
   reset_page_ref_cache()
   logseq.provideStyle({ key: fallback_page_style_key, style: '' })

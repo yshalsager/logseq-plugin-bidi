@@ -1,6 +1,7 @@
 import { text_direction_override, type TextDirection } from './direction'
 import { read_direction_overrides } from './logseq-data'
 import { type Cleanup } from './runtime-utils'
+import { build_override_badges_css } from './web-fallback-css'
 
 const outline_block_selector = '.ls-block:not(.is-comments-area):not([data-is-property]):not([data-query]):not([data-transclude]):not([data-embed]):not(:has(> .block-main-container[data-row-dir])):not(:has(> .block-main-container > .block-renderer-container))'
 const auto_dir_selector = `
@@ -45,6 +46,7 @@ export const install_host_direction_runtime = (graph_document: Document): Cleanu
     const epoch = ++refresh_epoch
     const overrides = await read_direction_overrides()
     if (epoch !== refresh_epoch) return
+    logseq.provideStyle({ key: 'logseq-plugin-bidi-override-badges', style: build_override_badges_css(overrides) })
     overrides.forEach((direction, block_id) => {
       const element = graph_document.querySelector(`.ls-block[blockid="${block_id}"]`)
       if (element) apply_block_override(element, direction)
@@ -71,6 +73,7 @@ export const install_host_direction_runtime = (graph_document: Document): Cleanu
 
   return () => {
     refresh_epoch += 1
+    logseq.provideStyle({ key: 'logseq-plugin-bidi-override-badges', style: '' })
     observer.disconnect()
     off_route_changed()
   }

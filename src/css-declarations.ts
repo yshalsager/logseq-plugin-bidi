@@ -11,6 +11,14 @@ export const rtl_editor_text_declarations = `  direction: rtl;
   text-align: right;
   unicode-bidi: plaintext;`
 
+export const override_badge_declarations = (content: string): string => `  content: ${content};
+  margin-inline: 0.5rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  direction: ltr;
+  unicode-bidi: isolate;
+  opacity: 0.45;`
+
 export const rtl_children_container_declarations = `  margin-left: 0;
   margin-inline-start: 0;
   margin-inline-end: 29px;`
