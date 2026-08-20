@@ -7,7 +7,7 @@ import {
   rtl_row_layout_declarations
 } from './css-declarations'
 
-const outline_block = '.ls-block:not(.is-comments-area):not([data-is-property]):not([data-query]):not([data-transclude]):not([data-embed]):not(:has(> .block-main-container[data-row-dir]))'
+const outline_block = '.ls-block:not(.is-comments-area):not([data-comment-item]):not([data-is-property]):not([data-query]):not([data-transclude]):not([data-embed]):not(:has(> .block-main-container.is-page-title-row)):not(:has(> .block-main-container[data-row-dir]))'
 const rtl_main_state = ':has(.block-content:dir(rtl), .block-content-inner:dir(rtl), .block-title-wrap:dir(rtl), textarea:dir(rtl), #mock-text:dir(rtl))'
 const rtl_block_state = ':has(> .block-main-container .block-content:dir(rtl), > .block-main-container .block-content-inner:dir(rtl), > .block-main-container .block-title-wrap:dir(rtl), > .block-main-container textarea:dir(rtl), > .block-main-container #mock-text:dir(rtl))'
 

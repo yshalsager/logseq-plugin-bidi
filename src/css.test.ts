@@ -43,8 +43,10 @@ test('preserves current Logseq row order and excludes full-block renderers', () 
   assert.match(web_css, /flex-direction: row-reverse;/)
   assert.match(host_pr_parity_style, /\.block-main-container:not\(:has\(> \.block-renderer-container\)\)/)
   assert.doesNotMatch(host_pr_parity_style, /^\.ls-block(?!:not\(\.is-comments-area\))/m)
+  assert.match(host_pr_parity_style, /:not\(\[data-comment-item\]\)/)
+  assert.match(host_pr_parity_style, /:not\(:has\(> \.block-main-container\.is-page-title-row\)\)/)
   assert.match(host_pr_parity_style, /\.flex\.flex-col\.w-full:not\(\.block-control-wrap\):not\(\.block-renderer-container\)/)
-  assert.match(web_css, /\.ls-block:not\(\[data-is-property\]\).*:not\(:has\(> \.block-main-container > \.block-renderer-container\)\)/)
+  assert.match(web_css, /\.ls-block:not\(\.is-comments-area\):not\(\[data-comment-item\]\).*:not\(:has\(> \.block-main-container\.is-page-title-row\)\).*:not\(:has\(> \.block-main-container > \.block-renderer-container\)\)/)
   assert.match(host_pr_parity_style, /margin-inline-end: 29px;/)
   assert.match(host_pr_parity_style, /border-right-width: var\(--ls-block-bullet-threading-width/)
   assert.match(web_css, /&\.ls-block > \.block-children-container/)
@@ -69,8 +71,10 @@ test('detects native markers without mistaking v0.1.1 attributes for core suppor
 })
 
 test('generated rtl css stays compact for large pages', () => {
-  const block_ids = Array.from({ length: 1000 }, (_, index) => `00000000-0000-0000-0000-${String(index).padStart(12, '0')}`)
-  assert.ok(Buffer.byteLength(build_rtl_blocks_css(block_ids)) < 100_000)
+  for (const [count, budget] of [[100, 20_000], [1000, 100_000], [5000, 300_000]]) {
+    const block_ids = Array.from({ length: count }, (_, index) => `00000000-0000-0000-0000-${String(index).padStart(12, '0')}`)
+    assert.ok(Buffer.byteLength(build_rtl_blocks_css(block_ids)) < budget, `${count} block CSS budget`)
+  }
 })
 
 test('bidi css preserves native block controls', () => {
@@ -83,7 +87,7 @@ test('base style can include or omit web fallback css', () => {
   const desktop_css = build_base_style(false)
   const web_css = build_base_style(true)
 
-  assert.match(desktop_css, /\.ls-block:not\(\.is-comments-area\):not\(\[data-is-property\]\):not\(\[data-query\]\)/)
+  assert.match(desktop_css, /\.ls-block:not\(\.is-comments-area\):not\(\[data-comment-item\]\):not\(\[data-is-property\]\):not\(\[data-query\]\)/)
   assert.doesNotMatch(desktop_css, /\.editor-inner textarea,\n#mock-text/)
   assert.match(web_css, /\.editor-inner textarea,\n#mock-text/)
   assert.match(web_css, /\.page-reference \{\n  unicode-bidi: isolate;/)

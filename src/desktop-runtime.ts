@@ -3,7 +3,7 @@ import { read_direction_overrides } from './logseq-data'
 import { type Cleanup } from './runtime-utils'
 import { build_override_badges_css } from './web-fallback-css'
 
-const outline_block_selector = '.ls-block:not(.is-comments-area):not([data-is-property]):not([data-query]):not([data-transclude]):not([data-embed]):not(:has(> .block-main-container[data-row-dir])):not(:has(> .block-main-container > .block-renderer-container))'
+const outline_block_selector = '.ls-block:not(.is-comments-area):not([data-comment-item]):not([data-is-property]):not([data-query]):not([data-transclude]):not([data-embed]):not(:has(> .block-main-container.is-page-title-row)):not(:has(> .block-main-container[data-row-dir])):not(:has(> .block-main-container > .block-renderer-container))'
 const auto_dir_selector = `
 ${outline_block_selector} .block-content,
 ${outline_block_selector} .block-content-inner,
