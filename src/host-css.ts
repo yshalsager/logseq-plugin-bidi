@@ -12,6 +12,10 @@ const rtl_main_state = ':has(.block-content:dir(rtl), .block-content-inner:dir(r
 const rtl_block_state = ':has(> .block-main-container .block-content:dir(rtl), > .block-main-container .block-content-inner:dir(rtl), > .block-main-container .block-title-wrap:dir(rtl), > .block-main-container textarea:dir(rtl), > .block-main-container #mock-text:dir(rtl))'
 
 export const host_pr_parity_style = `
+main.ls-fold-button-on-right {
+  --ls-bidi-block-children-indent: 7px;
+}
+
 a.tag {
   unicode-bidi: plaintext;
 }

@@ -21,7 +21,7 @@ export const override_badge_declarations = (content: string): string => `  conte
 
 export const rtl_children_container_declarations = `  margin-left: 0;
   margin-inline-start: 0;
-  margin-inline-end: 29px;`
+  margin-inline-end: var(--ls-bidi-block-children-indent, 29px);`
 
 export const rtl_children_border_position_declarations = `  left: auto;
   right: -1px;

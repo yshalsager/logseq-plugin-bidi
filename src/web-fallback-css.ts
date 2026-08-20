@@ -60,8 +60,8 @@ const block_row_item_selector_list = (suffix: string): string => (
   ].join(',\n')
 )
 
-const ltr_children_container_declarations = `  margin-left: 29px;
-  margin-inline-start: 29px;
+const ltr_children_container_declarations = `  margin-left: var(--ls-bidi-block-children-indent, 29px);
+  margin-inline-start: var(--ls-bidi-block-children-indent, 29px);
   margin-inline-end: 0;`
 
 const ltr_children_border_position_declarations = `  left: -1px;
