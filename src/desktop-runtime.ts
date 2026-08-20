@@ -45,7 +45,7 @@ export const install_host_direction_runtime = (graph_document: Document): Cleanu
   const refresh_entity_overrides = async (): Promise<void> => {
     const epoch = ++refresh_epoch
     const overrides = await read_direction_overrides()
-    if (epoch !== refresh_epoch) return
+    if (!overrides || epoch !== refresh_epoch) return
     logseq.provideStyle({ key: 'logseq-plugin-bidi-override-badges', style: build_override_badges_css(overrides) })
     overrides.forEach((direction, block_id) => {
       const element = graph_document.querySelector(`.ls-block[blockid="${block_id}"]`)

@@ -70,18 +70,19 @@ const refresh_fallback_page_style = async (
 ): Promise<void> => {
   last_fallback_page_refresh_ms = Date.now()
   const blocks = await read_current_page_blocks_tree(settings)
-  if (!is_current()) return
+  if (!blocks || !is_current()) return
 
   const direction_overrides = await read_direction_overrides()
+  if (!direction_overrides || !is_current()) return
   const rtl_block_ids = await collect_rtl_block_ids_from_tree(blocks, resolve_page_ref, infer_direction, direction_overrides)
   if (!is_current()) return
 
-  const page_title_direction = infer_direction(await current_page_title())
+  const page_title = await current_page_title()
   if (!is_current()) return
 
   fallback_rtl_block_ids = new Set(rtl_block_ids)
   fallback_direction_overrides = direction_overrides
-  fallback_page_title_style = build_page_title_css(page_title_direction)
+  if (page_title !== null) fallback_page_title_style = build_page_title_css(infer_direction(page_title))
   log_debug(settings, `fallback page scan: rtl=${rtl_block_ids.length}`)
   set_fallback_page_style(current_fallback_page_style())
 }

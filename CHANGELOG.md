@@ -8,6 +8,7 @@
 - Matched Logseq's compact nested-block indentation when fold controls are shown on the right.
 - Scoped desktop DOM observation to Logseq's app container.
 - Hid plugin direction actions when native Logseq bidi support disables the plugin runtime.
+- Retained the last known-good web layout when current-page or override data is temporarily unavailable.
 
 ## [0.1.6] - 2026-08-20
 

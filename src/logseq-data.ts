@@ -21,15 +21,15 @@ const first_non_blank_string = (values: Array<string | null>): string | null => 
   return null
 }
 
-export const read_direction_overrides = async (): Promise<Map<string, TextDirection>> => {
+export const read_direction_overrides = async (): Promise<Map<string, TextDirection> | null> => {
   const rows = await logseq.DB.datascriptQuery<Array<[string, TextDirection]>>(`
     [:find ?uuid ?direction
      :where
      [?b :block/uuid ?uuid]
      [?b :plugin.property.logseq-plugin-bidi/direction ?value]
      [?value :block/title ?direction]]
-  `).catch(() => [])
-  return new Map(rows.filter(([, direction]) => direction === 'rtl' || direction === 'ltr'))
+  `).catch(() => null)
+  return rows ? new Map(rows.filter(([, direction]) => direction === 'rtl' || direction === 'ltr')) : null
 }
 
 export const row_dir_source_text = (block: BlockNode): string => (
@@ -97,7 +97,7 @@ const page_identity_from_record = (page: PageNode | null): string | null => (
   page ? get_record_string(page, 'uuid') ?? page_title_from_record(page) : null
 )
 
-export const read_current_page_blocks_tree = async (settings: BidiSettings): Promise<Array<unknown>> => {
+export const read_current_page_blocks_tree = async (settings: BidiSettings): Promise<Array<unknown> | null> => {
   const resolve_tuples = (blocks: Array<unknown>): Promise<Array<unknown>> => resolve_block_tree_tuples(
     blocks,
     (uuid) => logseq.Editor.getBlock(uuid, { includeChildren: true }).catch((error) => {
@@ -116,18 +116,18 @@ export const read_current_page_blocks_tree = async (settings: BidiSettings): Pro
     return null as PageNode | null
   })
   const page_identity = page_identity_from_record(current_page)
-  if (!page_identity) return Array.isArray(current_page_blocks) ? current_page_blocks : []
+  if (!page_identity) return null
 
   const page_blocks = await logseq.Editor.getPageBlocksTree(page_identity).catch((error) => {
     log_debug(settings, `getPageBlocksTree fallback failed: ${String(error)}`)
     return null
   })
-  return Array.isArray(page_blocks) ? resolve_tuples(page_blocks) : []
+  return Array.isArray(page_blocks) ? resolve_tuples(page_blocks) : null
 }
 
-export const current_page_title = async (): Promise<string> => {
+export const current_page_title = async (): Promise<string | null> => {
   const current_page = await logseq.Editor.getCurrentPage().catch(() => null as PageNode | null)
-  return page_title_from_record(current_page) ?? ''
+  return current_page ? page_title_from_record(current_page) ?? '' : null
 }
 
 export const get_block_content_by_id = async (block_id: string): Promise<string> => {
