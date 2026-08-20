@@ -7,6 +7,7 @@
 - Left comment items and page-title rows under Logseq's native layout.
 - Matched Logseq's compact nested-block indentation when fold controls are shown on the right.
 - Scoped desktop DOM observation to Logseq's app container.
+- Hid plugin direction actions when native Logseq bidi support disables the plugin runtime.
 
 ## [0.1.6] - 2026-08-20
 

@@ -30,14 +30,14 @@ const clear_runtime = (): void => {
   clear_fallback_styles()
 }
 
-const start_runtime = (): void => {
+const start_runtime = (): boolean => {
   const settings = read_settings(logseq.settings)
   const { graph_block_dom_available, graph_document, host_dom_access } = get_graph_document()
 
   if (graph_block_dom_available && has_native_bidi_support(graph_document)) {
     logseq.provideStyle({ key: style_key, style: '' })
     log_debug(settings, 'native Logseq bidi support detected; plugin runtime disabled')
-    return
+    return false
   }
 
   install_style(host_dom_access)
@@ -45,7 +45,7 @@ const start_runtime = (): void => {
   if (!host_dom_access && !graph_block_dom_available) {
     runtime_cleanup_fns.push(install_fallback_direction_runtime(settings))
     log_debug(settings, 'host DOM inaccessible; installed per-block fallback runtime')
-    return
+    return true
   }
 
   runtime_cleanup_fns.push(install_host_direction_runtime(graph_document))
@@ -54,18 +54,20 @@ const start_runtime = (): void => {
     settings,
     `runtime started (host_dom_access=${String(host_dom_access)}, graph_block_dom_available=${String(graph_block_dom_available)})`
   )
+  return true
 }
 
-const restart_runtime = (): void => {
+const restart_runtime = (): boolean => {
   clear_runtime()
-  start_runtime()
+  return start_runtime()
 }
 
 const main = async (): Promise<void> => {
   logseq.useSettingsSchema(settings_schema)
 
-  restart_runtime()
-  const cleanup_block_direction_menu = install_block_direction_menu(restart_runtime)
+  const cleanup_block_direction_menu = restart_runtime()
+    ? install_block_direction_menu(restart_runtime)
+    : () => {}
 
   const off_settings_changed = logseq.onSettingsChanged(() => {
     restart_runtime()
