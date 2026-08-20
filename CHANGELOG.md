@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- Left comment items and page-title rows under Logseq's native layout.
+
 ## [0.1.6] - 2026-08-20
 
 ### Added
