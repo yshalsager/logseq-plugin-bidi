@@ -1,10 +1,15 @@
 # Changelog
 
-## [Unreleased]
+## [0.1.5] - 2026-08-20
 
 ### Added
 
 - Added native block context-menu actions for automatic, right-to-left, and left-to-right direction overrides, stored as hidden Logseq properties.
+
+### Fixed
+
+- Applied hidden direction overrides consistently on desktop and web using Logseq's native property data.
+- Replaced the previous property value when changing direction instead of accumulating hidden value blocks.
 
 ## [0.1.4] - 2026-08-18
 
