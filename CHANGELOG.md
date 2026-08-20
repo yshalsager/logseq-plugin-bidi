@@ -10,6 +10,7 @@
 - Hid plugin direction actions when native Logseq bidi support disables the plugin runtime.
 - Retained the last known-good web layout when current-page or override data is temporarily unavailable.
 - Limited generated override badge CSS to blocks mounted in the current view.
+- Updated vulnerable Logseq SDK transitive dependencies through reproducible pnpm overrides.
 
 ## [0.1.6] - 2026-08-20
 
