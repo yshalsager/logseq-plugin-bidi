@@ -53,7 +53,8 @@ export const install_host_direction_runtime = (graph_document: Document): Cleanu
     })
   }
 
-  apply_auto_dir_to_node(graph_document.documentElement)
+  const graph_root = graph_document.querySelector('#app-container') ?? graph_document.documentElement
+  apply_auto_dir_to_node(graph_root)
 
   const observer = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
@@ -61,7 +62,7 @@ export const install_host_direction_runtime = (graph_document: Document): Cleanu
       else mutation.addedNodes.forEach(apply_auto_dir_to_node)
     })
   })
-  observer.observe(graph_document.documentElement ?? graph_document, {
+  observer.observe(graph_root, {
     attributeFilter: ['data-block-title'],
     attributes: true,
     childList: true,
