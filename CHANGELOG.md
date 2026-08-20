@@ -9,6 +9,7 @@
 - Scoped desktop DOM observation to Logseq's app container.
 - Hid plugin direction actions when native Logseq bidi support disables the plugin runtime.
 - Retained the last known-good web layout when current-page or override data is temporarily unavailable.
+- Limited generated override badge CSS to blocks mounted in the current view.
 
 ## [0.1.6] - 2026-08-20
 

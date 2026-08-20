@@ -1,6 +1,8 @@
 import { create_text_direction_probe, non_blank_string, resolve_text_direction, type DirectionResolver, type TextDirection } from './direction'
 import {
+  block_id_from_node,
   current_page_title,
+  flatten_block_tree,
   get_block_content_by_id,
   page_title_from_record,
   read_current_page_blocks_tree,
@@ -72,8 +74,10 @@ const refresh_fallback_page_style = async (
   const blocks = await read_current_page_blocks_tree(settings)
   if (!blocks || !is_current()) return
 
-  const direction_overrides = await read_direction_overrides()
-  if (!direction_overrides || !is_current()) return
+  const all_direction_overrides = await read_direction_overrides()
+  if (!all_direction_overrides || !is_current()) return
+  const current_block_ids = new Set(flatten_block_tree(blocks).map(block_id_from_node))
+  const direction_overrides = new Map([...all_direction_overrides].filter(([block_id]) => current_block_ids.has(block_id)))
   const rtl_block_ids = await collect_rtl_block_ids_from_tree(blocks, resolve_page_ref, infer_direction, direction_overrides)
   if (!is_current()) return
 

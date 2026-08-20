@@ -46,11 +46,14 @@ export const install_host_direction_runtime = (graph_document: Document): Cleanu
     const epoch = ++refresh_epoch
     const overrides = await read_direction_overrides()
     if (!overrides || epoch !== refresh_epoch) return
-    logseq.provideStyle({ key: 'logseq-plugin-bidi-override-badges', style: build_override_badges_css(overrides) })
+    const visible_overrides = new Map<string, TextDirection>()
     overrides.forEach((direction, block_id) => {
       const element = graph_document.querySelector(`.ls-block[blockid="${block_id}"]`)
-      if (element) apply_block_override(element, direction)
+      if (!element) return
+      visible_overrides.set(block_id, direction)
+      apply_block_override(element, direction)
     })
+    logseq.provideStyle({ key: 'logseq-plugin-bidi-override-badges', style: build_override_badges_css(visible_overrides) })
   }
 
   const graph_root = graph_document.querySelector('#app-container') ?? graph_document.documentElement
