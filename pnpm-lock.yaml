@@ -17,8 +17,8 @@ importers:
         version: 0.3.4
     devDependencies:
       '@types/node':
-        specifier: 26.3.0
-        version: 26.3.0
+        specifier: 26.4.1
+        version: 26.4.1
       esbuild:
         specifier: 0.28.2
         version: 0.28.2
@@ -27,10 +27,10 @@ importers:
         version: 7.0.2
       vite:
         specifier: 8.2.2
-        version: 8.2.2(@types/node@26.3.0)(esbuild@0.28.2)
+        version: 8.2.2(@types/node@26.4.1)(esbuild@0.28.2)
       vite-plugin-domain:
-        specifier: 2.0.5
-        version: 2.0.5(vite@8.2.2(@types/node@26.3.0)(esbuild@0.28.2))
+        specifier: 2.0.6
+        version: 2.0.6(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2))
 
 packages:
 
@@ -301,8 +301,8 @@ packages:
   '@rolldown/pluginutils@1.0.1':
     resolution: {integrity: sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw==}
 
-  '@types/node@26.3.0':
-    resolution: {integrity: sha512-L3fgrnchriRC2ExBflb8j4uZZURHZfQsmQeyVzhjcHW4kkwVyo8/0h1B2MVzMTrYUJYu6G7EWs14hW/L9putqw==}
+  '@types/node@26.4.1':
+    resolution: {integrity: sha512-k97ENvZWtvA6yqz5/FS6a7duDgOPEeOQOc2iKS/nY6mX6qJUKtLnWzQS+Xj6tXweyj6ZcTAK2Qecetnvi9nCLA==}
 
   '@types/trusted-types@2.0.7':
     resolution: {integrity: sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==}
@@ -611,8 +611,8 @@ packages:
   util@0.10.4:
     resolution: {integrity: sha512-0Pm9hTQ3se5ll1XihRic3FDIku70C+iHUdT/W926rSgHV5QgXsYbKZN8MSC3tJtSkhuROzvsQjAaFENRXr+19A==}
 
-  vite-plugin-domain@2.0.5:
-    resolution: {integrity: sha512-DVYQd0f3YH04x7gc6STLwohcEELgrUoPYy7TvBp3BqIuCiCQmyEzkK6fMB5jzGOtSSGBtswNnlyEWsRl0Aa8hg==}
+  vite-plugin-domain@2.0.6:
+    resolution: {integrity: sha512-JwKl+9tK8kGarl5BfNbOSKaSRNHW58lt39gFkAnJrtJUQ5Y1qe+DkkHm3+BzulmSXFzuKGoirJ4qtYgHaMZ0gQ==}
     engines: {node: '>=18'}
     hasBin: true
     peerDependencies:
@@ -813,7 +813,7 @@ snapshots:
 
   '@rolldown/pluginutils@1.0.1': {}
 
-  '@types/node@26.3.0':
+  '@types/node@26.4.1':
     dependencies:
       undici-types: 8.3.0
 
@@ -1069,13 +1069,13 @@ snapshots:
     dependencies:
       inherits: 2.0.3
 
-  vite-plugin-domain@2.0.5(vite@8.2.2(@types/node@26.3.0)(esbuild@0.28.2)):
+  vite-plugin-domain@2.0.6(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)):
     dependencies:
       '@clack/prompts': 1.1.0
       picocolors: 1.1.1
-      vite: 8.2.2(@types/node@26.3.0)(esbuild@0.28.2)
+      vite: 8.2.2(@types/node@26.4.1)(esbuild@0.28.2)
 
-  vite@8.2.2(@types/node@26.3.0)(esbuild@0.28.2):
+  vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2):
     dependencies:
       lightningcss: 1.33.0
       picomatch: 4.0.7
@@ -1083,6 +1083,6 @@ snapshots:
       rolldown: 1.2.7
       tinyglobby: 0.2.17
     optionalDependencies:
-      '@types/node': 26.3.0
+      '@types/node': 26.4.1
       esbuild: 0.28.2
       fsevents: 2.3.3
