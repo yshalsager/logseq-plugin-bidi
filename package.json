@@ -5,7 +5,7 @@
   "description": "Bidirectional text and RTL block layout support for modern Logseq builds",
   "main": "dist/index.html",
   "type": "module",
-  "packageManager": "pnpm@11.25.0",
+  "packageManager": "pnpm@11.26.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/yshalsager/logseq-plugin-bidi.git"
@@ -36,7 +36,7 @@
     "@logseq/libs": "^0.3.4"
   },
   "devDependencies": {
-    "@types/node": "26.4.1",
+    "@types/node": "26.5.0",
     "esbuild": "0.28.2",
     "typescript": "7.0.2",
     "vite": "8.2.2",
